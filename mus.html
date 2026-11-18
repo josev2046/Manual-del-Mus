@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mus de la cuadrilla ALCE — Mesa de Juego</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --surface: #fcfbf7;
+      --surface-alt: #efece3;
+      --felt: #1e3b2c;
+      --felt-light: #274c39;
+      --felt-border: #152b20;
+      --ink: #1a1918;
+      --ink-muted: #5c5952;
+      --rule: #dcd7cb;
+      --rule-strong: #bdb6a6;
+      --accent: #7a261d;
+      --accent-hover: #5e1b14;
+      --accent-soft: #f5eae8;
+      --gold: #8c6a27;
+      --gold-light: #f3e5be;
+      --card-paper: #fffdf9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Editorial Header Bar */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule-strong);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .alce-emblem {
+      width: 46px;
+      height: 46px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .brand-text .kicker {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .brand-text h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.65rem;
+      font-weight: 600;
+      line-height: 1.05;
+      color: var(--ink);
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .rule-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--bg);
+      border: 1px solid var(--rule-strong);
+      padding: 0.4rem 0.75rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .rule-toggle input {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      color: var(--ink);
+      padding: 0.42rem 0.8rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--ink);
+      background: var(--surface-alt);
+    }
+
+    /* Main Layout Grid */
+    .workspace {
+      max-width: 1220px;
+      width: 100%;
+      margin: 1.25rem auto;
+      padding: 0 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 310px;
+      gap: 1.25rem;
+      flex-grow: 1;
+      align-items: start;
+    }
+
+    /* Green Baize Table Arena */
+    .table-arena {
+      background: radial-gradient(circle at 50% 48%, var(--felt-light) 0%, var(--felt) 100%);
+      border: 2px solid var(--felt-border);
+      box-shadow: inset 0 2px 18px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(26, 25, 24, 0.08);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 1rem;
+      min-height: 620px;
+      position: relative;
+      color: #f4f1ea;
+    }
+
+    /* Middle Row: West - Center Status - East */
+    .table-middle {
+      display: grid;
+      grid-template-columns: 175px 1fr 175px;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Seat Styling */
+    .seat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      position: relative;
+    }
+
+    .seat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(12, 26, 19, 0.65);
+      border: 1px solid rgba(235, 217, 170, 0.22);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: all 0.25s;
+    }
+
+    .seat.active-turn .seat-header {
+      border-color: var(--gold-light);
+      box-shadow: 0 0 0 2px rgba(243, 229, 190, 0.3);
+      background: rgba(122, 38, 29, 0.85);
+    }
+
+    .team-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .team-us { background: #e8b948; }
+    .team-them { background: #d95d4e; }
+
+    .mano-badge {
+      background: var(--gold-light);
+      color: #1a1918;
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* Speech Bubble */
+    .bubble {
+      min-height: 26px;
+      background: var(--card-paper);
+      color: var(--ink);
+      border: 1px solid var(--rule-strong);
+      border-radius: 6px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.2s, transform 0.2s;
+      text-align: center;
+      max-width: 195px;
+    }
+
+    .bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bubble.sena-cue {
+      background: #fff7e0;
+      border-color: #c9972c;
+      color: #5c4008;
+      font-style: italic;
+    }
+
+    /* Cards Hand Row */
+    .hand-row {
+      display: flex;
+      gap: 0.45rem;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 92px;
+    }
+
+    .seat-side .hand-row {
+      gap: 0.25rem;
+    }
+
+    /* Card Component (Matching Manual Aesthetic) */
+    .card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.18s ease;
+    }
+
+    .card-wrap.selectable {
+      cursor: pointer;
+    }
+
+    .card-wrap.selectable:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-wrap.selected {
+      transform: translateY(-12px);
+    }
+
+    .card-wrap.selected .card {
+      border: 2px solid #f7c948;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(247, 201, 72, 0.4);
+    }
+
+    .card {
+      width: 62px;
+      height: 94px;
+      background: var(--card-paper);
+      border: 1px solid #2b2925;
+      border-radius: 6px;
+      box-shadow: 0 4px 10px rgba(8, 18, 13, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3px;
+      position: relative;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .seat-side .card {
+      width: 36px;
+      height: 56px;
+      padding: 2px;
+      border-radius: 4px;
+    }
+
+    .seat-north .card {
+      width: 46px;
+      height: 70px;
+    }
+
+    .card-inner {
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 4px;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2px 4px;
+      position: relative;
+    }
+
+    .card-top, .card-bot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.74rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .seat-side .card-top, .seat-side .card-bot {
+      font-size: 0.55rem;
+    }
+
+    .seat-north .card-top, .seat-north .card-bot {
+      font-size: 0.62rem;
+    }
+
+    .card-bot {
+      transform: rotate(180deg);
+    }
+
+    .card-top svg, .card-bot svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .seat-side .card-top svg, .seat-side .card-bot svg {
+      width: 7px;
+      height: 7px;
+    }
+
+    /* Card Back Design */
+    .card.back {
+      background: #7a261d;
+      border-color: #2c0d0a;
+    }
+
+    .card.back .card-inner {
+      border: 1px solid rgba(243, 229, 190, 0.45);
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(243, 229, 190, 0.08) 0px,
+        rgba(243, 229, 190, 0.08) 3px,
+        transparent 3px,
+        transparent 6px
+      );
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card.back svg.back-seal {
+      width: 24px;
+      height: 24px;
+      color: rgba(243, 229, 190, 0.55);
+    }
+
+    .seat-side .card.back svg.back-seal {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Pip Grid for Number Cards (1-7) */
+    .pips {
+      flex-grow: 1;
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      padding: 1px 0;
+    }
+
+    .pips svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .seat-side .pips svg { width: 7px; height: 7px; }
+    .seat-north .pips svg { width: 9px; height: 9px; }
+
+    .pips.n1 { grid-template-columns: 1fr; }
+    .pips.n1 svg { width: 28px; height: 28px; }
+    .seat-side .pips.n1 svg { width: 15px; height: 15px; }
+    .seat-north .pips.n1 svg { width: 20px; height: 20px; }
+
+    .pips.n2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .pips.n2 svg { width: 16px; height: 16px; }
+    .seat-side .pips.n2 svg { width: 9px; height: 9px; }
+
+    .pips.n3 { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); }
+    .pips.n3 svg { width: 13px; height: 13px; }
+    .seat-side .pips.n3 svg { width: 7px; height: 7px; }
+
+    .pips.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .pips.n4 svg { width: 14px; height: 14px; }
+    .seat-side .pips.n4 svg { width: 8px; height: 8px; }
+
+    .pips.n5 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .pips.n5 svg:nth-child(3) { grid-column: 1 / span 2; }
+
+    .pips.n6 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
+
+    .pips.n7 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
+    .pips.n7 svg:nth-child(4) { grid-column: 1 / span 2; }
+    .pips.n7 svg { width: 10px; height: 10px; }
+    .seat-side .pips.n7 svg { width: 6px; height: 6px; }
+
+    /* Court Card Artwork */
+    .court-art {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      margin: 1px 0;
+    }
+
+    .court-art svg.figure {
+      width: 32px;
+      height: 32px;
+    }
+
+    .seat-side .court-art svg.figure { width: 18px; height: 18px; }
+    .seat-north .court-art svg.figure { width: 24px; height: 24px; }
+
+    .court-tag {
+      font-size: 0.48rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+    }
+
+    .seat-side .court-tag { display: none; }
+
+    /* Equivalence Tag on Green Felt */
+    .equiv-pill {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--gold-light);
+      background: rgba(11, 24, 17, 0.65);
+      border: 1px solid rgba(235, 217, 170, 0.3);
+      padding: 1px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .seat-side .equiv-pill {
+      font-size: 0.52rem;
+      padding: 0 3px;
+    }
+
+    /* Suit Colors */
+    .oros { color: #8c6a27; }
+    .copas { color: #8f2d22; }
+    .espadas { color: #24476e; }
+    .bastos { color: #2b5936; }
+
+    /* Center Table Felt Medallion / Status Box */
+    .table-center {
+      background: rgba(12, 26, 19, 0.62);
+      border: 1px solid rgba(235, 217, 170, 0.25);
+      border-radius: 10px;
+      padding: 1.15rem 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+      max-width: 360px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .lance-step-bar {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .step-pill {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.07);
+      color: rgba(244, 241, 234, 0.55);
+      border: 1px solid transparent;
+    }
+
+    .step-pill.current {
+      background: var(--accent);
+      color: #fff;
+      border-color: rgba(243, 229, 190, 0.4);
+    }
+
+    .step-pill.done {
+      color: var(--gold-light);
+      border-color: rgba(243, 229, 190, 0.25);
+    }
+
+    .center-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    .center-sub {
+      font-size: 0.82rem;
+      color: #d8d3c8;
+      min-height: 1.3em;
+    }
+
+    .pot-badge {
+      background: rgba(140, 106, 39, 0.35);
+      border: 1px solid rgba(243, 229, 190, 0.35);
+      color: var(--gold-light);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    /* Human Action Control Deck (Bottom of Table) */
+    .action-deck {
+      background: rgba(12, 26, 19, 0.78);
+      border: 1px solid rgba(235, 217, 170, 0.28);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+      min-height: 48px;
+    }
+
+    .btn-act {
+      background: var(--card-paper);
+      color: var(--ink);
+      border: 1px solid var(--rule-strong);
+      border-radius: 5px;
+      padding: 0.45rem 0.9rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-act:hover:not(:disabled) {
+      background: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-act:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-act.primary {
+      background: #e8b948;
+      border-color: #c9972c;
+      color: #1a1918;
+    }
+
+    .btn-act.primary:hover:not(:disabled) {
+      background: #f2c963;
+    }
+
+    .btn-act.ordago {
+      background: var(--accent);
+      border-color: #a3382c;
+      color: #fff;
+    }
+
+    .btn-act.ordago:hover:not(:disabled) {
+      background: #962f24;
+    }
+
+    .btn-sena {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--gold-light);
+      border: 1px solid rgba(243, 229, 190, 0.3);
+      border-radius: 5px;
+      padding: 0.42rem 0.75rem;
+      font-size: 0.76rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-sena:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-sena:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .waiting-note {
+      font-size: 0.8rem;
+      color: rgba(244, 241, 234, 0.72);
+      font-style: italic;
+    }
+
+    /* Right Sidebar: Scoreboard & Chronicle */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 1.15rem;
+    }
+
+    .panel-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ink);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.45rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .panel-title span.sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-muted);
+    }
+
+    /* Tantómetro Score Cards */
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .team-score-box {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .team-score-box.us { border-top: 3px solid #c9972c; }
+    .team-score-box.them { border-top: 3px solid var(--accent); }
+
+    .team-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+    }
+
+    .tantos-num {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--ink);
+      margin: 0.2rem 0;
+    }
+
+    .piedras-breakdown {
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+    }
+
+    .chicos-pill {
+      display: inline-block;
+      margin-top: 0.45rem;
+      background: var(--surface);
+      border: 1px solid var(--rule-strong);
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* Live Hand Summary for Human */
+    .my-hand-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px dashed var(--rule);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .summary-row span:first-child {
+      color: var(--ink-muted);
+    }
+
+    .summary-row span:last-child {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* Action Chronicle Log */
+    .log-list {
+      max-height: 230px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      padding-right: 0.25rem;
+    }
+
+    .log-entry {
+      padding: 0.3rem 0.5rem;
+      background: var(--bg);
+      border-radius: 4px;
+      border-left: 2px solid var(--rule-strong);
+    }
+
+    .log-entry.highlight {
+      border-left-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .log-entry.lance-head {
+      border-left-color: var(--felt);
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--surface-alt);
+    }
+
+    /* Showdown & Rules Modal Overlay */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 22, 19, 0.65);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 200;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--rule-strong);
+      border-radius: 8px;
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.75rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    }
+
+    .modal-card h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.85rem;
+      color: var(--ink);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .showdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem;
+      font-size: 0.84rem;
+    }
+
+    .showdown-table th, .showdown-table td {
+      padding: 0.55rem 0.65rem;
+      border-bottom: 1px solid var(--rule);
+      text-align: left;
+    }
+
+    .showdown-table th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-muted);
+      background: var(--bg);
+    }
+
+    .pts-won {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .rules-quick-list {
+      padding-left: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: var(--ink-muted);
+      font-size: 0.88rem;
+    }
+
+    .rules-quick-list strong {
+      color: var(--ink);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.76rem;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 960px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .table-middle {
+        grid-template-columns: 125px 1fr 125px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .table-middle {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+      .seat-side .hand-row {
+        flex-direction: row;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Shared SVG Definitions (ALCE Emblem, Spanish Suits & Court Figures) -->
+  <svg style="display:none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="logo-alce" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" stroke-width="6.5" />
+      <circle cx="100" cy="100" r="81.5" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M51 107 L68 57 C71 49 82 49 86 57 L100 84 L114 57 C118 49 129 49 132 57 L149 107 H135 L123 70 L107 101 L100 88 L93 101 L77 70 L65 107 Z"
+            fill="none" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round" />
+      <path d="M50 107 H61 M73 107 H149" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M64 108 C65 101, 67 93, 68 86 C67 80, 69 73, 76 69 C84 64, 96 61, 106 56 C110 52, 114 48, 118 46 C117 41, 119 36, 123 33 C124 36, 125 39, 125 42 C127 39, 129 38, 131 38 C130 42, 128 45, 126 48 C129 52, 131 58, 131 64 C131 69, 128 72, 124 72 C121 71, 118 68, 116 65 C114 68, 113 72, 114 75 C118 76, 121 79, 120 83 C118 86, 112 87, 106 86 C105 84, 106 82, 109 81 C111 80, 111 78, 108 77 C102 77, 94 79, 87 83 C81 88, 76 96, 70 108 Z"
+            fill="currentColor" />
+      <line x1="51" y1="116" x2="149" y2="116" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" />
+      <line x1="51" y1="123.5" x2="149" y2="123.5" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" />
+      <text x="100" y="153" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="800" font-style="italic" font-size="31" letter-spacing="2.5" fill="currentColor">ALCE</text>
+    </symbol>
+
+    <symbol id="suit-oros" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="#f7c948" stroke="#8c6200" stroke-width="2.2"/>
+      <circle cx="16" cy="16" r="8.5" fill="none" stroke="#8c6200" stroke-width="1.4"/>
+      <circle cx="16" cy="16" r="3" fill="#b8860b"/>
+    </symbol>
+    <symbol id="suit-copas" viewBox="0 0 32 32">
+      <path d="M7,5 H25 L22.5,15 C22.5,19.5 9.5,19.5 9.5,15 Z" fill="#d64538" stroke="#7a1c14" stroke-width="2"/>
+      <rect x="14" y="18" width="4" height="7" fill="#d64538" stroke="#7a1c14" stroke-width="1.5"/>
+      <path d="M9,25 H23 L25,29 H7 Z" fill="#f0b429" stroke="#7a1c14" stroke-width="1.8"/>
+    </symbol>
+    <symbol id="suit-espadas" viewBox="0 0 32 32">
+      <path d="M16,2 L19.5,7 L18.5,21 H13.5 L12.5,7 Z" fill="#5c8ec9" stroke="#16324f" stroke-width="1.8"/>
+      <rect x="8" y="21" width="16" height="3.2" rx="1.5" fill="#f0b429" stroke="#16324f" stroke-width="1.5"/>
+      <rect x="14.2" y="24" width="3.6" height="4.5" fill="#8c6200" stroke="#16324f" stroke-width="1.3"/>
+      <circle cx="16" cy="29.5" r="2.2" fill="#f0b429" stroke="#16324f" stroke-width="1.3"/>
+    </symbol>
+    <symbol id="suit-bastos" viewBox="0 0 32 32">
+      <path d="M13.5,29 L11.5,9 C11.5,5 20.5,5 20.5,9 L18.5,29 Z" fill="#4c956c" stroke="#1b4332" stroke-width="2"/>
+      <ellipse cx="11.5" cy="14" rx="2.8" ry="1.6" fill="#2d6a4f" stroke="#1b4332" stroke-width="1.3"/>
+      <ellipse cx="20.5" cy="20" rx="2.8" ry="1.6" fill="#2d6a4f" stroke="#1b4332" stroke-width="1.3"/>
+    </symbol>
+
+    <symbol id="fig-rey" viewBox="0 0 36 36">
+      <path d="M5,25 L7,11 L13,17 L18,9 L23,17 L29,11 L31,25 Z" fill="#f7c948" stroke="#7a5200" stroke-width="2" stroke-linejoin="round"/>
+      <rect x="5" y="25" width="26" height="4.5" rx="1.5" fill="#d64538" stroke="#7a1c14" stroke-width="1.6"/>
+      <circle cx="18" cy="19" r="2" fill="#d64538"/>
+    </symbol>
+    <symbol id="fig-caballo" viewBox="0 0 40 40">
+      <path d="M9,23 C5,22 4,27 6,31 C7,28 8,26 10,25 Z" fill="#3d231a"/>
+      <path d="M23,8 C20,8 19,12 20,16 L23,15 Z" fill="#3d231a"/>
+      <path d="M10,34 L11,24 L9,21 C9,18 12,16 16,16 L21,15 L23,8 L25,5 L26,8 L31,11 L30,14 L26,14 L25,20 L31,16 L33,18 L26,24 L27,34 L24,34 L23,25 L15,25 L13,34 Z"
+            fill="#8d5b4c" stroke="#3d231a" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M15,16 L22,16 L21,21 L14,21 Z" fill="#b83227" stroke="#f0b429" stroke-width="1.1"/>
+      <circle cx="26.5" cy="10" r="1.1" fill="#fff"/>
+    </symbol>
+    <symbol id="fig-sota" viewBox="0 0 40 40">
+      <path d="M13,18 L10,28 L30,28 L27,18 Z" fill="#24476e" stroke="#162d47" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="12" y="22.5" width="16" height="2.2" fill="#f0b429"/>
+      <path d="M15,18 L20,21 L25,18" fill="none" stroke="#f7c948" stroke-width="1.6"/>
+      <path d="M15,28 L14,34 H18 V28 Z M22,28 V34 H26 L25,28 Z" fill="#4a3525" stroke="#261a11" stroke-width="1.3"/>
+      <circle cx="20" cy="13" r="4.2" fill="#f3cfa7" stroke="#5c3d24" stroke-width="1.4"/>
+      <path d="M14,10.5 C15,6.5 25,6.5 26,10.5 Z" fill="#b83227" stroke="#6b1811" stroke-width="1.4"/>
+      <path d="M24,8 C27,5 30,5 32,7" fill="none" stroke="#f0b429" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+
+  <header>
+    <div class="brand">
+      <svg class="alce-emblem" aria-hidden="true"><use href="#logo-alce" /></svg>
+      <div class="brand-text">
+        <div class="kicker">Mesa Oficial · 4 Jugadores</div>
+        <h1>Mus de la cuadrilla ALCE</h1>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <label class="rule-toggle" title="Activa la regla opcional de La Real en Pares (2 reyes + 2 ases ganan a todos los duples)">
+        <input type="checkbox" id="opt-la-real" />
+        <span>Regla opcional: <strong>La Real</strong> en Pares</span>
+      </label>
+      <button type="button" class="btn-ghost" id="btn-rules">Reglas rápidas</button>
+      <button type="button" class="btn-ghost" id="btn-new-match">Nueva partida</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <!-- Left: Green Baize Table -->
+    <div class="table-arena">
+      <!-- NORTH SEAT (Partner) -->
+      <div class="seat seat-north" id="seat-2">
+        <div class="bubble" id="bubble-2"></div>
+        <div class="hand-row" id="hand-2"></div>
+        <div class="seat-header">
+          <span class="team-dot team-us"></span>
+          <span>Compañero (Norte)</span>
+          <span class="mano-badge" id="mano-2" style="display:none;">Mano</span>
+        </div>
+      </div>
+
+      <!-- MIDDLE: WEST - CENTER - EAST -->
+      <div class="table-middle">
+        <!-- WEST SEAT (Opponent 2) -->
+        <div class="seat seat-side" id="seat-3">
+          <div class="bubble" id="bubble-3"></div>
+          <div class="hand-row" id="hand-3"></div>
+          <div class="seat-header">
+            <span class="team-dot team-them"></span>
+            <span>Rival Oeste</span>
+            <span class="mano-badge" id="mano-3" style="display:none;">Mano</span>
+          </div>
+        </div>
+
+        <!-- CENTER STATUS MEDALLION -->
+        <div class="table-center">
+          <div class="lance-step-bar" id="lance-steps">
+            <span class="step-pill" data-step="MUS">Mus</span>
+            <span class="step-pill" data-step="GRANDE">Grande</span>
+            <span class="step-pill" data-step="CHICA">Chica</span>
+            <span class="step-pill" data-step="PARES">Pares</span>
+            <span class="step-pill" data-step="JUEGO">Juego</span>
+          </div>
+          <div class="center-title" id="center-title">Preparando mesa…</div>
+          <div class="center-sub" id="center-sub">Repartiendo 4 cartas a cada jugador</div>
+          <div class="pot-badge" id="pot-badge">En juego: 1 tanto (en paso)</div>
+        </div>
+
+        <!-- EAST SEAT (Opponent 1) -->
+        <div class="seat seat-side" id="seat-1">
+          <div class="bubble" id="bubble-1"></div>
+          <div class="hand-row" id="hand-1"></div>
+          <div class="seat-header">
+            <span class="team-dot team-them"></span>
+            <span>Rival Este</span>
+            <span class="mano-badge" id="mano-1" style="display:none;">Mano</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOUTH SEAT (Human Player) -->
+      <div class="seat seat-south" id="seat-0">
+        <div class="seat-header">
+          <span class="team-dot team-us"></span>
+          <span>Tú (Sur)</span>
+          <span class="mano-badge" id="mano-0" style="display:none;">Mano</span>
+        </div>
+        <div class="hand-row" id="hand-0"></div>
+        <div class="bubble" id="bubble-0"></div>
+        <div class="action-deck" id="action-deck"></div>
+      </div>
+    </div>
+
+    <!-- Right: Tantómetro Scoreboard & Chronicle -->
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-title">
+          <span>Tantómetro</span>
+          <span class="sub">A 40 tantos</span>
+        </div>
+        <div class="score-grid">
+          <div class="team-score-box us">
+            <div class="team-name">Nosotros (ALCE)</div>
+            <div class="tantos-num" id="score-us">0</div>
+            <div class="piedras-breakdown" id="piedras-us">0 amarrakos · 0 piedras</div>
+            <div class="chicos-pill" id="chicos-us">0 Chicos</div>
+          </div>
+          <div class="team-score-box them">
+            <div class="team-name">Ellos (Rivales)</div>
+            <div class="tantos-num" id="score-them">0</div>
+            <div class="piedras-breakdown" id="piedras-them">0 amarrakos · 0 piedras</div>
+            <div class="chicos-pill" id="chicos-them">0 Chicos</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>Tu Mano Actual</span>
+          <span class="sub" id="my-pts-badge">0 pts</span>
+        </div>
+        <div class="my-hand-summary">
+          <div class="summary-row"><span>La Grande:</span><span id="sum-grande">—</span></div>
+          <div class="summary-row"><span>La Chica:</span><span id="sum-chica">—</span></div>
+          <div class="summary-row"><span>Los Pares:</span><span id="sum-pares">—</span></div>
+          <div class="summary-row"><span>Juego / Punto:</span><span id="sum-juego">—</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>Crónica de la Mano</span>
+          <span class="sub">En vivo</span>
+        </div>
+        <div class="log-list" id="log-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    &copy; La cuadrilla ALCE — ya sabéis quiénes sois. · Reglamento estándar de Madrid (40 cartas, 3=Rey, 2=As).
+  </footer>
+
+  <!-- Showdown / End-of-Hand Modal -->
+  <div class="modal-backdrop" id="showdown-modal">
+    <div class="modal-card">
+      <h2 id="modal-title">Resolución de la Mano</h2>
+      <p id="modal-subtitle" style="color: var(--ink-muted); font-size: 0.9rem;"></p>
+      <table class="showdown-table">
+        <thead>
+          <tr>
+            <th>Lance</th>
+            <th>Jugada Ganadora</th>
+            <th>Equipo</th>
+            <th>Tantos</th>
+          </tr>
+        </thead>
+        <tbody id="showdown-tbody"></tbody>
+      </table>
+      <div id="showdown-hands-reveal" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; font-size: 0.8rem; background: var(--bg); padding: 0.85rem; border-radius: 6px; border: 1px solid var(--rule);"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-act primary" id="btn-next-hand">Siguiente mano</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Rules Reference Modal -->
+  <div class="modal-backdrop" id="rules-modal">
+    <div class="modal-card">
+      <h2>Reglamento Rápido — Cuadrilla ALCE</h2>
+      <ul class="rules-quick-list">
+        <li><strong>Baraja española de 40 cartas:</strong> Sin ochos ni nueves. Los palos no tienen jerarquía.</li>
+        <li><strong>Equivalencias:</strong> Los <strong>treses (3)</strong> valen como <strong>reyes</strong> (8 reyes) y los <strong>doses (2)</strong> valen como <strong>ases</strong> (8 ases).</li>
+        <li><strong>Jerarquía (mayor a menor):</strong> Rey/3 &gt; Caballo &gt; Sota &gt; 7 &gt; 6 &gt; 5 &gt; 4 &gt; As/2.</li>
+        <li><strong>Puntos:</strong> Figuras (12, 11, 10) y Treses = <strong>10 pts</strong>; del 4 al 7 = su número; As y Dos = <strong>1 pt</strong>.</li>
+        <li><strong>La «Mano»:</strong> Jugador a la derecha del repartidor (orden antihorario: Sur &rarr; Este &rarr; Norte &rarr; Oeste). Gana todos los empates sin criterio numérico.</li>
+        <li><strong>Los 4 Lances:</strong> 1. <em>Grande</em> (cartas altas) &rarr; 2. <em>Chica</em> (cartas bajas) &rarr; 3. <em>Pares</em> (Par, Medias, Duples) &rarr; 4. <em>Juego</em> (31 &gt; 32 &gt; 40 &gt; 36 &gt; 35 &gt; 34 &gt; 33) o <em>Punto</em> (cerca de 30).</li>
+        <li><strong>Desempate de Duples:</strong> Primero pareja más alta y luego segunda pareja (<code>4 reyes &gt; reyes y caballos &gt; reyes y ases</code>, salvo si activas <em>La Real</em>).</li>
+      </ul>
+      <div class="modal-actions">
+        <button type="button" class="btn-act primary" id="btn-close-rules">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      /* =========================================================
+         1. DOMAIN CONSTANTS & 40-CARD SPANISH DECK ENGINE
+         ========================================================= */
+      const SUITS = ['oros', 'copas', 'espadas', 'bastos'];
+      const SUIT_NAMES = { oros: 'Oros', copas: 'Copas', espadas: 'Espadas', bastos: 'Bastos' };
+
+      // Physical faces in 40-card Spanish deck
+      const FACES = [
+        { face: 12, effRank: 7, name: 'Rey', pts: 10, isCourt: true, fig: 'fig-rey', tag: 'Rey', equiv: null },
+        { face: 3,  effRank: 7, name: '3',   pts: 10, isCourt: false, equiv: '= Rey' },
+        { face: 11, effRank: 6, name: 'Caballo', pts: 10, isCourt: true, fig: 'fig-caballo', tag: 'Caballo', equiv: null },
+        { face: 10, effRank: 5, name: 'Sota', pts: 10, isCourt: true, fig: 'fig-sota', tag: 'Sota', equiv: null },
+        { face: 7,  effRank: 4, name: '7',   pts: 7, isCourt: false, equiv: null },
+        { face: 6,  effRank: 3, name: '6',   pts: 6, isCourt: false, equiv: null },
+        { face: 5,  effRank: 2, name: '5',   pts: 5, isCourt: false, equiv: null },
+        { face: 4,  effRank: 1, name: '4',   pts: 4, isCourt: false, equiv: null },
+        { face: 1,  effRank: 0, name: 'As',  pts: 1, isCourt: false, equiv: null },
+        { face: 2,  effRank: 0, name: '2',   pts: 1, isCourt: false, equiv: '= As' }
+      ];
+
+      const EFF_META = [
+        { name: 'As', plural: 'ases', pts: 1 },
+        { name: '4', plural: 'cuatros', pts: 4 },
+        { name: '5', plural: 'cincos', pts: 5 },
+        { name: '6', plural: 'seises', pts: 6 },
+        { name: '7', plural: 'sietes', pts: 7 },
+        { name: 'Sota', plural: 'sotas', pts: 10 },
+        { name: 'Caballo', plural: 'caballos', pts: 10 },
+        { name: 'Rey', plural: 'reyes', pts: 10 }
+      ];
+
+      const JUEGO_ORDER = [31, 32, 40, 36, 35, 34, 33];
+
+      // Seats: 0 = South (Tú), 1 = East (Rival Este), 2 = North (Compañero), 3 = West (Rival Oeste)
+      // Turn order is counter-clockwise: 0 -> 1 -> 2 -> 3 -> 0
+      const PLAYERS = [
+        { id: 0, name: 'Tú', team: 0, isHuman: true },
+        { id: 1, name: 'Rival Este', team: 1, isHuman: false },
+        { id: 2, name: 'Compañero', team: 0, isHuman: false },
+        { id: 3, name: 'Rival Oeste', team: 1, isHuman: false }
+      ];
+
+      /* =========================================================
+         2. HAND EVALUATION LOGIC (STRICT MADRID RULES + LA REAL)
+         ========================================================= */
+      function sortDescRanks(cards) {
+        return cards.map(c => c.effRank).sort((a, b) => b - a);
+      }
+
+      function scoreGrande(cards) {
+        const h = sortDescRanks(cards);
+        return h[0] * 512 + h[1] * 64 + h[2] * 8 + h[3];
+      }
+
+      function scoreChica(cards) {
+        const h = sortDescRanks(cards); // [highest ... lowest]
+        return (7 - h[3]) * 512 + (7 - h[2]) * 64 + (7 - h[1]) * 8 + (7 - h[0]);
+      }
+
+      function evalPares(cards, laRealActive) {
+        const h = sortDescRanks(cards);
+        const counts = {};
+        h.forEach(r => counts[r] = (counts[r] || 0) + 1);
+        const groups = Object.entries(counts)
+          .map(([r, cnt]) => ({ r: Number(r), cnt }))
+          .sort((a, b) => (b.cnt - a.cnt) || (b.r - a.r));
+
+        if (groups[0].cnt === 4) {
+          const r = groups[0].r;
+          return {
+            has: true,
+            type: 'Duples',
+            bonus: 3,
+            score: 300 + r * 10 + r,
+            label: `Duples de ${EFF_META[r].plural}`
+          };
+        }
+        if (groups[0].cnt === 2 && groups[1].cnt === 2) {
+          const r1 = groups[0].r;
+          const r2 = groups[1].r;
+          const isGallegos = (r1 === 7 && r2 === 0);
+          if (isGallegos && laRealActive) {
+            return {
+              has: true,
+              type: 'La Real',
+              bonus: 3,
+              score: 399,
+              label: 'La Real (Reyes y Ases)'
+            };
+          }
+          return {
+            has: true,
+            type: 'Duples',
+            bonus: 3,
+            score: 300 + r1 * 10 + r2,
+            label: isGallegos
+              ? 'Duples gallegos (Reyes y Ases)'
+              : `Duples de ${EFF_META[r1].plural} y ${EFF_META[r2].plural}`
+          };
+        }
+        if (groups[0].cnt === 3) {
+          const r = groups[0].r;
+          return {
+            has: true,
+            type: 'Medias',
+            bonus: 2,
+            score: 200 + r,
+            label: `Medias de ${EFF_META[r].plural}`
+          };
+        }
+        if (groups[0].cnt === 2) {
+          const r = groups[0].r;
+          return {
+            has: true,
+            type: 'Par',
+            bonus: 1,
+            score: 100 + r,
+            label: `Par de ${EFF_META[r].plural}`
+          };
+        }
+        return { has: false, type: 'No', bonus: 0, score: 0, label: 'Sin pares' };
+      }
+
+      function evalJuego(cards) {
+        const sum = cards.reduce((acc, c) => acc + c.pts, 0);
+        if (sum >= 31) {
+          const idx = JUEGO_ORDER.indexOf(sum); // 0 is best (31), 6 is worst (33)
+          return {
+            hasJuego: true,
+            sum,
+            bonus: sum === 31 ? 3 : 2,
+            score: 100 + (10 - idx),
+            label: sum === 31 ? '31 (La Una)' : `Juego de ${sum}`
+          };
+        }
+        return {
+          hasJuego: false,
+          sum,
+          bonus: 1,
+          score: sum,
+          label: `Punto de ${sum}`
+        };
+      }
+
+      // Positional distance from current Mano (0 = Mano, 3 = Postre)
+      function manoDistance(playerId, manoId) {
+        return (playerId - manoId + 4) % 4;
+      }
+
+      /* =========================================================
+         3. GAME STATE
+         ========================================================= */
+      const state = {
+        deck: [],
+        hands: [[], [], [], []],
+        selectedDiscards: new Set(),
+        mano: 0, // Player 0 starts as Mano
+        phase: 'IDLE', // MUS_CALL, DISCARD_SELECT, LANCE_BET, SHOWDOWN, MATCH_OVER
+        lanceIndex: 0, // 0: GRANDE, 1: CHICA, 2: PARES, 3: JUEGO
+        isPunto: false,
+        turnPlayer: 0,
+        musCallsCount: 0,
+        // Current lance betting state
+        betAmount: 1, // 1 = en paso
+        lastBetterTeam: -1,
+        pendingBet: 0, // >0 if a bet is awaiting response from opposing team
+        isOrdago: false,
+        passesInRow: 0,
+        eligiblePlayers: [0, 1, 2, 3],
+        // Deferred resolution records for each lance in current hand
+        lanceOutcomes: [],
+        // Match scores
+        scores: [0, 0], // Team 0 (Us), Team 1 (Them)
+        chicos: [0, 0],
+        revealAll: false,
+        senaSentThisHand: false,
+        timer: null
+      };
+
+      const LANCES = ['GRANDE', 'CHICA', 'PARES', 'JUEGO'];
+      const LANCE_TITLES = {
+        GRANDE: '1. La Grande',
+        CHICA: '2. La Chica',
+        PARES: '3. Los Pares',
+        JUEGO: '4. El Juego'
+      };
+
+      /* =========================================================
+         4. DECK & DEALING HELPERS
+         ========================================================= */
+      function buildShuffledDeck() {
+        const d = [];
+        SUITS.forEach(suit => {
+          FACES.forEach(f => {
+            d.push({ ...f, suit, uid: `${f.face}-${suit}` });
+          });
+        });
+        for (let i = d.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [d[i], d[j]] = [d[j], d[i]];
+        }
+        return d;
+      }
+
+      function drawCards(n) {
+        if (state.deck.length < n) {
+          // Reshuffle discard pile into deck if exhausted
+          const inHands = new Set(state.hands.flat().map(c => c.uid));
+          const fresh = buildShuffledDeck().filter(c => !inHands.has(c.uid));
+          state.deck.push(...fresh);
+        }
+        return state.deck.splice(0, n);
+      }
+
+      /* =========================================================
+         5. UI RENDERING
+         ========================================================= */
+      function renderCardHTML(card, hidden = false, selectable = false, selected = false, idx = 0) {
+        if (hidden) {
+          return `
+            <div class="card-wrap">
+              <div class="card back">
+                <div class="card-inner">
+                  <svg class="back-seal"><use href="#logo-alce"/></svg>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        let centerHTML = '';
+        if (card.isCourt) {
+          centerHTML = `<div class="court-art"><svg class="figure"><use href="#${card.fig}"/></svg><span class="court-tag">${card.tag}</span></div>`;
+        } else {
+          const pips = Array.from({ length: card.face }, () => `<svg><use href="#suit-${card.suit}"/></svg>`).join('');
+          centerHTML = `<div class="pips n${card.face}">${pips}</div>`;
+        }
+        const equivHTML = card.equiv ? `<span class="equiv-pill">${card.equiv}</span>` : '';
+
+        return `
+          <div class="card-wrap ${selectable ? 'selectable' : ''} ${selected ? 'selected' : ''}" data-card-idx="${idx}">
+            <div class="card ${card.suit}">
+              <div class="card-inner">
+                <div class="card-top"><span>${card.face}</span><svg><use href="#suit-${card.suit}"/></svg></div>
+                ${centerHTML}
+                <div class="card-bot"><span>${card.face}</span><svg><use href="#suit-${card.suit}"/></svg></div>
+              </div>
+            </div>
+            ${equivHTML}
+          </div>
+        `;
+      }
+
+      function renderTable() {
+        const laReal = document.getElementById('opt-la-real').checked;
+
+        // Render hands & Mano badges
+        for (let p = 0; p < 4; p++) {
+          const handEl = document.getElementById(`hand-${p}`);
+          const manoEl = document.getElementById(`mano-${p}`);
+          const seatEl = document.getElementById(`seat-${p}`);
+
+          manoEl.style.display = (state.mano === p) ? 'inline-block' : 'none';
+          seatEl.classList.toggle('active-turn', state.turnPlayer === p && state.phase !== 'SHOWDOWN' && state.phase !== 'MATCH_OVER');
+
+          const isHuman = (p === 0);
+          const showCards = isHuman || state.revealAll;
+          const canSelect = isHuman && state.phase === 'DISCARD_SELECT';
+
+          // Sort human hand visually by effRank descending for clarity
+          const cards = state.hands[p];
+          handEl.innerHTML = cards.map((c, idx) =>
+            renderCardHTML(c, !showCards, canSelect, state.selectedDiscards.has(idx), idx)
+          ).join('');
+        }
+
+        // Attach discard click listeners for human
+        if (state.phase === 'DISCARD_SELECT') {
+          document.querySelectorAll('#hand-0 .card-wrap.selectable').forEach(el => {
+            el.addEventListener('click', () => {
+              const idx = Number(el.dataset.cardIdx);
+              if (state.selectedDiscards.has(idx)) {
+                state.selectedDiscards.delete(idx);
+              } else {
+                state.selectedDiscards.add(idx);
+              }
+              renderTable();
+              renderActionDeck();
+            });
+          });
+        }
+
+        // Update step pills
+        const currentStepKey = state.phase === 'MUS_CALL' || state.phase === 'DISCARD_SELECT'
+          ? 'MUS'
+          : LANCES[state.lanceIndex];
+
+        document.querySelectorAll('.step-pill').forEach(pill => {
+          const step = pill.dataset.step;
+          pill.classList.remove('current', 'done');
+          if (step === 'JUEGO') {
+            pill.textContent = state.isPunto ? 'Punto' : 'Juego';
+          }
+          if (state.phase === 'SHOWDOWN' || state.phase === 'MATCH_OVER') {
+            pill.classList.add('done');
+          } else if (step === currentStepKey) {
+            pill.classList.add('current');
+          } else {
+            const order = ['MUS', 'GRANDE', 'CHICA', 'PARES', 'JUEGO'];
+            if (order.indexOf(step) < order.indexOf(currentStepKey)) {
+              pill.classList.add('done');
+            }
+          }
+        });
+
+        // Update human hand live evaluation sidebar
+        const myCards = state.hands[0];
+        if (myCards.length === 4) {
+          const descRanks = sortDescRanks(myCards).map(r => EFF_META[r].name).join(' · ');
+          const ascRanks = [...sortDescRanks(myCards)].reverse().map(r => EFF_META[r].name).join(' · ');
+          const pInfo = evalPares(myCards, laReal);
+          const jInfo = evalJuego(myCards);
+
+          document.getElementById('my-pts-badge').textContent = `${jInfo.sum} pts`;
+          document.getElementById('sum-grande').textContent = descRanks;
+          document.getElementById('sum-chica').textContent = ascRanks;
+          document.getElementById('sum-pares').textContent = pInfo.label;
+          document.getElementById('sum-juego').textContent = jInfo.label;
+        }
+
+        // Update Tantómetro
+        updateScoreboardUI();
+      }
+
+      function updateScoreboardUI() {
+        for (let t = 0; t < 2; t++) {
+          const pts = state.scores[t];
+          const amarrakos = Math.floor(pts / 5);
+          const piedras = pts % 5;
+          const id = t === 0 ? 'us' : 'them';
+          document.getElementById(`score-${id}`).textContent = pts;
+          document.getElementById(`piedras-${id}`).textContent = `${amarrakos} amarrakos · ${piedras} piedras`;
+          document.getElementById(`chicos-${id}`).textContent = `${state.chicos[t]} ${state.chicos[t] === 1 ? 'Chico' : 'Chicos'}`;
+        }
+      }
+
+      function showBubble(playerId, text, isSena = false, duration = 2600) {
+        const el = document.getElementById(`bubble-${playerId}`);
+        el.textContent = text;
+        el.classList.toggle('sena-cue', isSena);
+        el.classList.add('visible');
+        clearTimeout(el._hideTimer);
+        if (duration > 0) {
+          el._hideTimer = setTimeout(() => {
+            el.classList.remove('visible');
+          }, duration);
+        }
+      }
+
+      function addLog(text, type = '') {
+        const list = document.getElementById('log-list');
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.textContent = text;
+        list.prepend(div);
+      }
+
+      function setCenterStatus(title, sub, potText) {
+        document.getElementById('center-title').textContent = title;
+        document.getElementById('center-sub').textContent = sub;
+        if (potText !== undefined) {
+          document.getElementById('pot-badge').textContent = potText;
+        }
+      }
+
+      /* =========================================================
+         6. HUMAN ACTION DECK
+         ========================================================= */
+      function renderActionDeck() {
+        const deckEl = document.getElementById('action-deck');
+        deckEl.innerHTML = '';
+
+        if (state.phase === 'DISCARD_SELECT') {
+          const count = state.selectedDiscards.size;
+          const btn = document.createElement('button');
+          btn.className = 'btn-act primary';
+          btn.textContent = count === 0
+            ? 'Servido (no descartar)'
+            : `Descartar ${count} ${count === 1 ? 'carta' : 'cartas'}`;
+          btn.onclick = executeAllDiscards;
+          deckEl.appendChild(btn);
+          return;
+        }
+
+        if (state.turnPlayer !== 0 || (state.phase !== 'MUS_CALL' && state.phase !== 'LANCE_BET')) {
+          deckEl.innerHTML = `<span class="waiting-note">Turno de ${PLAYERS[state.turnPlayer].name}…</span>`;
+          return;
+        }
+
+        if (state.phase === 'MUS_CALL') {
+          const btnMus = document.createElement('button');
+          btnMus.className = 'btn-act primary';
+          btnMus.textContent = 'Mus';
+          btnMus.onclick = () => handleMusChoice(0, true);
+
+          const btnCortar = document.createElement('button');
+          btnCortar.className = 'btn-act';
+          btnCortar.textContent = 'Cortar (No hay mus)';
+          btnCortar.onclick = () => handleMusChoice(0, false);
+
+          deckEl.appendChild(btnMus);
+          deckEl.appendChild(btnCortar);
+          addSenaButtonIfAvailable(deckEl);
+          return;
+        }
+
+        if (state.phase === 'LANCE_BET') {
+          if (state.pendingBet > 0) {
+            // Responding to opponent's bet or ordago
+            const btnQuiero = document.createElement('button');
+            btnQuiero.className = 'btn-act primary';
+            btnQuiero.textContent = state.isOrdago ? '¡Quiero el Órdago!' : `Quiero (${state.pendingBet} tantos)`;
+            btnQuiero.onclick = () => handleBetAction(0, 'QUIERO');
+
+            const btnNoQuiero = document.createElement('button');
+            btnNoQuiero.className = 'btn-act';
+            btnNoQuiero.textContent = 'No quiero';
+            btnNoQuiero.onclick = () => handleBetAction(0, 'NO_QUIERO');
+
+            deckEl.appendChild(btnQuiero);
+            deckEl.appendChild(btnNoQuiero);
+
+            if (!state.isOrdago) {
+              const btnRevido = document.createElement('button');
+              btnRevido.className = 'btn-act';
+              btnRevido.textContent = `Subir (+2 -> ${state.pendingBet + 2})`;
+              btnRevido.onclick = () => handleBetAction(0, 'RAISE', 2);
+
+              const btnOrdago = document.createElement('button');
+              btnOrdago.className = 'btn-act ordago';
+              btnOrdago.textContent = '¡Órdago!';
+              btnOrdago.onclick = () => handleBetAction(0, 'ORDAGO');
+
+              deckEl.appendChild(btnRevido);
+              deckEl.appendChild(btnOrdago);
+            }
+          } else {
+            // Opening action (no active bet yet)
+            const btnPaso = document.createElement('button');
+            btnPaso.className = 'btn-act';
+            btnPaso.textContent = 'Paso';
+            btnPaso.onclick = () => handleBetAction(0, 'PASO');
+
+            const btnEnvido = document.createElement('button');
+            btnEnvido.className = 'btn-act primary';
+            btnEnvido.textContent = 'Envido (2 tantos)';
+            btnEnvido.onclick = () => handleBetAction(0, 'BET', 2);
+
+            const btnEnvido5 = document.createElement('button');
+            btnEnvido5.className = 'btn-act';
+            btnEnvido5.textContent = 'Envido 5';
+            btnEnvido5.onclick = () => handleBetAction(0, 'BET', 5);
+
+            const btnOrdago = document.createElement('button');
+            btnOrdago.className = 'btn-act ordago';
+            btnOrdago.textContent = '¡Órdago!';
+            btnOrdago.onclick = () => handleBetAction(0, 'ORDAGO');
+
+            deckEl.appendChild(btnPaso);
+            deckEl.appendChild(btnEnvido);
+            deckEl.appendChild(btnEnvido5);
+            deckEl.appendChild(btnOrdago);
+            addSenaButtonIfAvailable(deckEl);
+          }
+        }
+      }
+
+      function detectBestSena(cards) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        const h = sortDescRanks(cards);
+        const j = evalJuego(cards);
+        const p = evalPares(cards, laReal);
+        const kings = h.filter(r => r === 7).length;
+        const aces = h.filter(r => r === 0).length;
+
+        if (j.sum === 31) return { gesture: 'Guiño de ojo', meaning: '31 (La Una)' };
+        if (p.type === 'La Real' || p.type === 'Duples') return { gesture: 'Elevar cejas', meaning: p.label };
+        if (p.type === 'Medias') return { gesture: 'Morderse un lado del labio', meaning: p.label };
+        if (kings >= 2) return { gesture: 'Morderse el labio inferior', meaning: 'Dos Reyes' };
+        if (aces >= 2) return { gesture: 'Sacar la punta de la lengua', meaning: 'Dos Ases' };
+        return { gesture: 'Cerrar los ojos', meaning: 'Ciego (sin juego)' };
+      }
+
+      function addSenaButtonIfAvailable(container) {
+        const sena = detectBestSena(state.hands[0]);
+        const btn = document.createElement('button');
+        btn.className = 'btn-sena';
+        btn.disabled = state.senaSentThisHand;
+        btn.textContent = state.senaSentThisHand ? 'Seña enviada' : `Pasar seña (${sena.gesture})`;
+        btn.title = `Comunica a tu compañero: ${sena.meaning}`;
+        btn.onclick = () => {
+          state.senaSentThisHand = true;
+          showBubble(0, `Seña: ${sena.gesture} (${sena.meaning})`, true, 3000);
+          addLog(`Pasas seña al compañero: ${sena.gesture} [${sena.meaning}].`);
+          renderActionDeck();
+        };
+        container.appendChild(btn);
+      }
+
+      /* =========================================================
+         7. GAME FLOW & AI DECISION ENGINE
+         ========================================================= */
+      function startNewHand() {
+        clearTimeout(state.timer);
+        state.deck = buildShuffledDeck();
+        state.hands = [drawCards(4), drawCards(4), drawCards(4), drawCards(4)];
+        // Sort human cards nicely
+        state.hands[0].sort((a, b) => b.effRank - a.effRank);
+        state.selectedDiscards.clear();
+        state.phase = 'MUS_CALL';
+        state.lanceIndex = 0;
+        state.isPunto = false;
+        state.turnPlayer = state.mano;
+        state.musCallsCount = 0;
+        state.lanceOutcomes = [];
+        state.revealAll = false;
+        state.senaSentThisHand = false;
+
+        document.getElementById('showdown-modal').classList.remove('open');
+        addLog(`— Nueva mano. Reparte ${PLAYERS[(state.mano + 3) % 4].name}; es mano ${PLAYERS[state.mano].name}. —`, 'lance-head');
+        setCenterStatus('Fase de Mus', `Habla ${PLAYERS[state.turnPlayer].name}: ¿Mus o Cortar?`, 'Descartes abiertos');
+
+        // Partner occasionally signals early
+        maybePartnerSena();
+
+        renderTable();
+        renderActionDeck();
+        scheduleAIIfNeeded();
+      }
+
+      function maybePartnerSena() {
+        if (Math.random() < 0.72) {
+          const sena = detectBestSena(state.hands[2]);
+          setTimeout(() => {
+            if (state.phase !== 'SHOWDOWN' && state.phase !== 'MATCH_OVER') {
+              showBubble(2, `Seña: ${sena.gesture} (${sena.meaning})`, true, 3400);
+              addLog(`Tu compañero te hace una seña: ${sena.gesture} (${sena.meaning}).`);
+            }
+          }, 900);
+        }
+      }
+
+      function aiWantsMus(playerId) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        const cards = state.hands[playerId];
+        const j = evalJuego(cards);
+        const p = evalPares(cards, laReal);
+        const g = scoreGrande(cards);
+        const c = scoreChica(cards);
+
+        // Cut if holding 31, strong Duples/Medias, or very strong Grande/Chica
+        if (j.sum === 31 || j.sum === 32) return false;
+        if (p.type === 'Duples' || p.type === 'La Real' || p.type === 'Medias') return false;
+        if (g >= 7 * 512 + 7 * 64 + 6 * 8) return false; // 2+ Kings + Caballo
+        if (c >= 7 * 512 + 7 * 64 + 6 * 8) return false; // 3+ Aces
+        return true;
+      }
+
+      function handleMusChoice(playerId, wantsMus) {
+        if (state.phase !== 'MUS_CALL' || state.turnPlayer !== playerId) return;
+
+        if (!wantsMus) {
+          showBubble(playerId, '¡Corto! No hay mus.');
+          addLog(`${PLAYERS[playerId].name} corta el mus.`);
+          state.timer = setTimeout(() => beginLances(), 950);
+          return;
+        }
+
+        showBubble(playerId, 'Mus.');
+        addLog(`${PLAYERS[playerId].name} dice Mus.`);
+        state.musCallsCount++;
+
+        if (state.musCallsCount >= 4) {
+          // Everyone agreed to Mus -> enter discard phase
+          state.phase = 'DISCARD_SELECT';
+          state.selectedDiscards.clear();
+          setCenterStatus('Descarte de cartas', 'Selecciona las cartas que quieres cambiar y pulsa Descartar', 'Todos dijeron Mus');
+          renderTable();
+          renderActionDeck();
+        } else {
+          state.turnPlayer = (state.turnPlayer + 1) % 4;
+          setCenterStatus('Fase de Mus', `Turno de ${PLAYERS[state.turnPlayer].name}: ¿Mus o Cortar?`, `${state.musCallsCount}/4 Mus`);
+          renderTable();
+          renderActionDeck();
+          scheduleAIIfNeeded();
+        }
+      }
+
+      function aiChooseDiscardIndices(cards) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        const p = evalPares(cards, laReal);
+        const j = evalJuego(cards);
+
+        // Keep pairs/trips if present
+        if (p.has) {
+          const counts = {};
+          cards.forEach(c => counts[c.effRank] = (counts[c.effRank] || 0) + 1);
+          const toDiscard = [];
+          cards.forEach((c, idx) => {
+            if (counts[c.effRank] === 1 && c.effRank !== 7 && c.effRank !== 0) {
+              toDiscard.push(idx);
+            }
+          });
+          return toDiscard.length > 0 ? toDiscard : [3];
+        }
+
+        // Otherwise keep Kings (7) and Aces (0), discard middle cards (4,5,6,7,Sota)
+        const toDiscard = [];
+        cards.forEach((c, idx) => {
+          if (c.effRank !== 7 && c.effRank !== 0) toDiscard.push(idx);
+        });
+        return toDiscard.length > 0 ? toDiscard : [0, 1, 2, 3];
+      }
+
+      function executeAllDiscards() {
+        // Human discards
+        const humanDiscards = Array.from(state.selectedDiscards).sort((a, b) => b - a);
+        humanDiscards.forEach(idx => state.hands[0].splice(idx, 1));
+        state.hands[0].push(...drawCards(humanDiscards.length));
+        state.hands[0].sort((a, b) => b.effRank - a.effRank);
+        addLog(`Te descartas de ${humanDiscards.length} ${humanDiscards.length === 1 ? 'carta' : 'cartas'}.`);
+
+        // AI discards
+        for (let p = 1; p < 4; p++) {
+          const idxs = aiChooseDiscardIndices(state.hands[p]).sort((a, b) => b - a);
+          idxs.forEach(idx => state.hands[p].splice(idx, 1));
+          state.hands[p].push(...drawCards(idxs.length));
+          showBubble(p, `Cambio ${idxs.length}`);
+        }
+
+        // Loop back to another Mus round starting from Mano
+        state.phase = 'MUS_CALL';
+        state.turnPlayer = state.mano;
+        state.musCallsCount = 0;
+        state.selectedDiscards.clear();
+        setCenterStatus('Nueva ronda de Mus', `Habla ${PLAYERS[state.turnPlayer].name}: ¿Mus o Cortar?`, 'Cartas repartidas');
+        renderTable();
+        renderActionDeck();
+        scheduleAIIfNeeded();
+      }
+
+      /* =========================================================
+         8. THE FOUR MANDATORY LANCES
+         ========================================================= */
+      function beginLances() {
+        state.lanceIndex = 0;
+        setupCurrentLance();
+      }
+
+      function setupCurrentLance() {
+        if (state.lanceIndex >= 4) {
+          resolveEndOfHandShowdown();
+          return;
+        }
+
+        const laReal = document.getElementById('opt-la-real').checked;
+        const lance = LANCES[state.lanceIndex];
+        state.phase = 'LANCE_BET';
+        state.betAmount = 1; // 1 = en paso
+        state.lastBetterTeam = -1;
+        state.pendingBet = 0;
+        state.isOrdago = false;
+        state.passesInRow = 0;
+
+        if (lance === 'GRANDE' || lance === 'CHICA') {
+          state.eligiblePlayers = [0, 1, 2, 3];
+          addLog(`Lance ${state.lanceIndex + 1}: ${LANCE_TITLES[lance]}`, 'lance-head');
+        } else if (lance === 'PARES') {
+          const hasPares = [0, 1, 2, 3].map(p => evalPares(state.hands[p], laReal).has);
+          hasPares.forEach((yes, p) => {
+            showBubble(p, yes ? 'Pares sí' : 'Pares no');
+          });
+          const team0Has = hasPares[0] || hasPares[2];
+          const team1Has = hasPares[1] || hasPares[3];
+          addLog(`Lance 3: Los Pares — ${PLAYERS.map((pl, i) => `${pl.name}: ${hasPares[i] ? 'Sí' : 'No'}`).join(', ')}.`, 'lance-head');
+
+          if (!team0Has && !team1Has) {
+            state.lanceOutcomes.push({ lance: 'PARES', label: '3. Los Pares', winnerTeam: -1, pts: 0, detail: 'Nadie tiene pares' });
+            setCenterStatus('3. Los Pares', 'Nadie tiene pares. Pasamos al Juego…', 'Sin jugada');
+            renderTable();
+            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1350);
+            return;
+          }
+          if (!team0Has || !team1Has) {
+            // Only one team has Pares -> auto-win at end of hand (1 tanto base + jugada bonus)
+            const winTeam = team0Has ? 0 : 1;
+            const bonus = calcParesBonusForTeam(winTeam, laReal);
+            state.lanceOutcomes.push({
+              lance: 'PARES',
+              label: '3. Los Pares',
+              winnerTeam: winTeam,
+              pts: 1 + bonus,
+              detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (+${bonus} jugada)`
+            });
+            setCenterStatus('3. Los Pares', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (se anota al final).`, 'Sin rival en pares');
+            renderTable();
+            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1450);
+            return;
+          }
+          state.eligiblePlayers = [0, 1, 2, 3].filter(p => hasPares[p]);
+        } else if (lance === 'JUEGO') {
+          const hasJuego = [0, 1, 2, 3].map(p => evalJuego(state.hands[p]).hasJuego);
+          const team0Has = hasJuego[0] || hasJuego[2];
+          const team1Has = hasJuego[1] || hasJuego[3];
+
+          if (!team0Has && !team1Has) {
+            // Switch to El Punto!
+            state.isPunto = true;
+            state.eligiblePlayers = [0, 1, 2, 3];
+            hasJuego.forEach((_, p) => showBubble(p, 'Juego no'));
+            addLog('Lance 4: Nadie tiene 31+. Se juega al Punto (cerca de 30).', 'lance-head');
+          } else {
+            state.isPunto = false;
+            hasJuego.forEach((yes, p) => showBubble(p, yes ? 'Juego sí' : 'Juego no'));
+            addLog(`Lance 4: El Juego — ${PLAYERS.map((pl, i) => `${pl.name}: ${hasJuego[i] ? 'Sí' : 'No'}`).join(', ')}.`, 'lance-head');
+
+            if (!team0Has || !team1Has) {
+              const winTeam = team0Has ? 0 : 1;
+              const bonus = calcJuegoBonusForTeam(winTeam);
+              state.lanceOutcomes.push({
+                lance: 'JUEGO',
+                label: '4. El Juego',
+                winnerTeam: winTeam,
+                pts: 1 + bonus,
+                detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (+${bonus} jugada)`
+              });
+              setCenterStatus('4. El Juego', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (se anota al final).`, 'Sin rival en juego');
+              renderTable();
+              state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1450);
+              return;
+            }
+            state.eligiblePlayers = [0, 1, 2, 3].filter(p => hasJuego[p]);
+          }
+        }
+
+        // Find first eligible player starting from Mano
+        state.turnPlayer = getNextEligiblePlayer(state.mano, true);
+        const title = (lance === 'JUEGO' && state.isPunto) ? '4. El Punto' : LANCE_TITLES[lance];
+        setCenterStatus(title, `Habla ${PLAYERS[state.turnPlayer].name}`, 'En juego: 1 tanto (en paso)');
+        renderTable();
+        renderActionDeck();
+        scheduleAIIfNeeded();
+      }
+
+      function getNextEligiblePlayer(fromId, inclusive = false) {
+        for (let step = inclusive ? 0 : 1; step <= 4; step++) {
+          const candidate = (fromId + step) % 4;
+          if (state.eligiblePlayers.includes(candidate)) return candidate;
+        }
+        return fromId;
+      }
+
+      function getNextEligibleOpponent(fromId, opposingTeam) {
+        for (let step = 1; step <= 4; step++) {
+          const candidate = (fromId + step) % 4;
+          if (state.eligiblePlayers.includes(candidate) && PLAYERS[candidate].team === opposingTeam) {
+            return candidate;
+          }
+        }
+        return fromId;
+      }
+
+      function handleBetAction(playerId, action, amount = 0) {
+        if (state.phase !== 'LANCE_BET' || state.turnPlayer !== playerId) return;
+        const player = PLAYERS[playerId];
+        const lance = LANCES[state.lanceIndex];
+        const lanceLabel = (lance === 'JUEGO' && state.isPunto) ? '4. El Punto' : LANCE_TITLES[lance];
+
+        if (action === 'PASO') {
+          showBubble(playerId, 'Paso.');
+          addLog(`${player.name} pasa en ${lanceLabel}.`);
+          state.passesInRow++;
+
+          if (state.passesInRow >= state.eligiblePlayers.length) {
+            // Everyone passed -> lance stays "en paso" (1 tanto resolved at end of hand)
+            state.lanceOutcomes.push({
+              lance,
+              label: lanceLabel,
+              winnerTeam: null, // Computed at showdown
+              pts: 1,
+              isPaso: true,
+              detail: 'En paso (1 tanto)'
+            });
+            setCenterStatus(lanceLabel, 'Todos pasan. Se resolverá al final de la mano.', 'En paso: 1 tanto');
+            renderTable();
+            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 950);
+          } else {
+            state.turnPlayer = getNextEligiblePlayer(playerId, false);
+            setCenterStatus(lanceLabel, `Turno de ${PLAYERS[state.turnPlayer].name}`, 'En paso: 1 tanto');
+            renderTable();
+            renderActionDeck();
+            scheduleAIIfNeeded();
+          }
+          return;
+        }
+
+        if (action === 'BET') {
+          state.pendingBet = amount;
+          state.lastBetterTeam = player.team;
+          showBubble(playerId, `¡Envido ${amount}!`);
+          addLog(`${player.name} envida ${amount} tantos en ${lanceLabel}.`, 'highlight');
+          state.turnPlayer = getNextEligibleOpponent(playerId, 1 - player.team);
+          setCenterStatus(lanceLabel, `Envite de ${amount} tantos — responde ${PLAYERS[state.turnPlayer].name}`, `Apuesta: ${amount} tantos`);
+          renderTable();
+          renderActionDeck();
+          scheduleAIIfNeeded();
+          return;
+        }
+
+        if (action === 'RAISE') {
+          const newTotal = state.pendingBet + amount;
+          state.betAmount = state.pendingBet; // Previous agreed floor if folded
+          state.pendingBet = newTotal;
+          state.lastBetterTeam = player.team;
+          showBubble(playerId, `¡Subo a ${newTotal}!`);
+          addLog(`${player.name} sube la apuesta a ${newTotal} tantos.`, 'highlight');
+          state.turnPlayer = getNextEligibleOpponent(playerId, 1 - player.team);
+          setCenterStatus(lanceLabel, `Subida a ${newTotal} tantos — responde ${PLAYERS[state.turnPlayer].name}`, `Apuesta: ${newTotal} tantos`);
+          renderTable();
+          renderActionDeck();
+          scheduleAIIfNeeded();
+          return;
+        }
+
+        if (action === 'ORDAGO') {
+          if (state.pendingBet > 0) state.betAmount = state.pendingBet;
+          state.isOrdago = true;
+          state.pendingBet = 40;
+          state.lastBetterTeam = player.team;
+          showBubble(playerId, '¡¡ÓRDAGO!!');
+          addLog(`¡¡${player.name} lanza un ÓRDAGO en ${lanceLabel}!!`, 'highlight');
+          state.turnPlayer = getNextEligibleOpponent(playerId, 1 - player.team);
+          setCenterStatus(lanceLabel, `¡¡ÓRDAGO!! Responde ${PLAYERS[state.turnPlayer].name}`, '¡¡ÓRDAGO (40 tantos)!!');
+          renderTable();
+          renderActionDeck();
+          scheduleAIIfNeeded();
+          return;
+        }
+
+        if (action === 'QUIERO') {
+          showBubble(playerId, '¡Quiero!');
+          if (state.isOrdago) {
+            addLog(`¡${player.name} QUIERE el Órdago! Se descubren las cartas.`, 'highlight');
+            resolveOrdagoImmediately(lance, lanceLabel);
+            return;
+          }
+          addLog(`${player.name} quiere los ${state.pendingBet} tantos en ${lanceLabel}.`);
+          state.lanceOutcomes.push({
+            lance,
+            label: lanceLabel,
+            winnerTeam: null, // Computed at showdown
+            pts: state.pendingBet,
+            isPaso: false,
+            detail: `Envite querido (${state.pendingBet} tantos)`
+          });
+          setCenterStatus(lanceLabel, `Envite querido (${state.pendingBet} tantos). Se resuelve al final.`, `Queridos: ${state.pendingBet} tantos`);
+          renderTable();
+          state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1050);
+          return;
+        }
+
+        if (action === 'NO_QUIERO') {
+          const winTeam = state.lastBetterTeam;
+          const wonPts = state.betAmount; // 1 tanto de dejada if initial bet was refused, or previous floor
+          showBubble(playerId, 'No quiero.');
+          addLog(`${player.name} no quiere. ${winTeam === 0 ? 'Nosotros' : 'Ellos'} ganan ${wonPts} ${wonPts === 1 ? 'tanto' : 'tantos'} de dejada.`);
+          // Dejada points are awarded immediately in Mus!
+          awardPointsImmediate(winTeam, wonPts);
+          if (state.phase === 'MATCH_OVER') return;
+
+          state.lanceOutcomes.push({
+            lance,
+            label: lanceLabel,
+            winnerTeam: winTeam,
+            pts: wonPts,
+            alreadyAwarded: true,
+            detail: `No querido (+${wonPts} dejada inmediata)`
+          });
+          setCenterStatus(lanceLabel, `No querido (+${wonPts} para ${winTeam === 0 ? 'Nosotros' : 'Ellos'}).`, 'Dejada anotada');
+          renderTable();
+          state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1050);
+        }
+      }
+
+      /* =========================================================
+         9. AI BETTING HEURISTICS
+         ========================================================= */
+      function evaluateAIStrengthForLance(playerId, lance) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        const cards = state.hands[playerId];
+        if (lance === 'GRANDE') {
+          // Max scoreGrande is 7*512 + 7*64 + 7*8 + 7 = 4095
+          return scoreGrande(cards) / 4095;
+        }
+        if (lance === 'CHICA') {
+          return scoreChica(cards) / 4095;
+        }
+        if (lance === 'PARES') {
+          const p = evalPares(cards, laReal);
+          if (p.type === 'La Real' || p.type === 'Duples') return 0.92;
+          if (p.type === 'Medias') return 0.72;
+          return 0.35 + ((p.score - 100) / 15);
+        }
+        if (lance === 'JUEGO') {
+          const j = evalJuego(cards);
+          if (!state.isPunto) {
+            if (j.sum === 31) return 0.96;
+            if (j.sum === 32) return 0.80;
+            if (j.sum === 40) return 0.65;
+            return 0.42;
+          } else {
+            return j.sum / 30;
+          }
+        }
+        return 0.5;
+      }
+
+      function scheduleAIIfNeeded() {
+        clearTimeout(state.timer);
+        if (state.phase !== 'MUS_CALL' && state.phase !== 'LANCE_BET') return;
+        if (state.turnPlayer === 0) return; // Human's turn
+
+        const pid = state.turnPlayer;
+        state.timer = setTimeout(() => {
+          if (state.phase === 'MUS_CALL') {
+            handleMusChoice(pid, aiWantsMus(pid));
+          } else if (state.phase === 'LANCE_BET') {
+            const lance = LANCES[state.lanceIndex];
+            const str = evaluateAIStrengthForLance(pid, lance);
+            const r = Math.random();
+
+            if (state.pendingBet > 0) {
+              if (state.isOrdago) {
+                // Accept ordago only with very strong hand (or desperate score)
+                if (str >= 0.84 || (state.scores[1 - PLAYERS[pid].team] >= 36 && str >= 0.72)) {
+                  handleBetAction(pid, 'QUIERO');
+                } else {
+                  handleBetAction(pid, 'NO_QUIERO');
+                }
+              } else {
+                if (str >= 0.88 && r < 0.22) {
+                  handleBetAction(pid, 'ORDAGO');
+                } else if (str >= 0.78 && state.pendingBet < 8 && r < 0.45) {
+                  handleBetAction(pid, 'RAISE', 2);
+                } else if (str >= 0.52 || (state.pendingBet <= 2 && str >= 0.42 && r < 0.5)) {
+                  handleBetAction(pid, 'QUIERO');
+                } else {
+                  handleBetAction(pid, 'NO_QUIERO');
+                }
+              }
+            } else {
+              // Opening bet
+              if (str >= 0.92 && r < 0.15) {
+                handleBetAction(pid, 'ORDAGO');
+              } else if (str >= 0.66 || (str >= 0.55 && r < 0.35)) {
+                handleBetAction(pid, 'BET', 2);
+              } else {
+                handleBetAction(pid, 'PASO');
+              }
+            }
+          }
+        }, 900);
+      }
+
+      /* =========================================================
+         10. SCORING & SHOWDOWN RESOLUTION
+         ========================================================= */
+      function determineLanceWinner(lance) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        let bestPlayer = 0;
+        let bestScore = -1;
+
+        for (let i = 0; i < 4; i++) {
+          // Iterate in Mano priority order so earlier Mano wins exact ties!
+          const pid = (state.mano + i) % 4;
+          const cards = state.hands[pid];
+          let sc = -1;
+
+          if (lance === 'GRANDE') sc = scoreGrande(cards);
+          else if (lance === 'CHICA') sc = scoreChica(cards);
+          else if (lance === 'PARES') {
+            const p = evalPares(cards, laReal);
+            sc = p.has ? p.score : -1;
+          } else if (lance === 'JUEGO') {
+            const j = evalJuego(cards);
+            if (!state.isPunto) sc = j.hasJuego ? j.score : -1;
+            else sc = j.score;
+          }
+
+          if (sc > bestScore) {
+            bestScore = sc;
+            bestPlayer = pid;
+          }
+        }
+        return { winnerPlayer: bestPlayer, winnerTeam: PLAYERS[bestPlayer].team };
+      }
+
+      function calcParesBonusForTeam(team, laReal) {
+        let total = 0;
+        [0, 1, 2, 3].forEach(pid => {
+          if (PLAYERS[pid].team === team) {
+            total += evalPares(state.hands[pid], laReal).bonus;
+          }
+        });
+        return total;
+      }
+
+      function calcJuegoBonusForTeam(team) {
+        let total = 0;
+        [0, 1, 2, 3].forEach(pid => {
+          if (PLAYERS[pid].team === team) {
+            const j = evalJuego(state.hands[pid]);
+            if (j.hasJuego) total += j.bonus;
+          }
+        });
+        return total;
+      }
+
+      function awardPointsImmediate(team, pts) {
+        state.scores[team] += pts;
+        updateScoreboardUI();
+        checkChicoWin();
+      }
+
+      function checkChicoWin() {
+        for (let t = 0; t < 2; t++) {
+          if (state.scores[t] >= 40) {
+            state.chicos[t]++;
+            state.phase = 'MATCH_OVER';
+            state.revealAll = true;
+            renderTable();
+            const winnerName = t === 0 ? '¡Nosotros (Cuadrilla ALCE) ganamos el Chico!' : 'Ellos (los Rivales) ganan el Chico.';
+            addLog(`🏆 ${winnerName} (${state.scores[0]} a ${state.scores[1]})`, 'highlight');
+            showShowdownModal(winnerName, 'Se han alcanzado los 40 tantos reglamentarios. Pulsa «Siguiente mano» para empezar un nuevo Chico.', true);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function resolveOrdagoImmediately(lance, lanceLabel) {
+        state.revealAll = true;
+        renderTable();
+        const { winnerPlayer, winnerTeam } = determineLanceWinner(lance);
+        state.scores[winnerTeam] = 40;
+        state.chicos[winnerTeam]++;
+        state.phase = 'MATCH_OVER';
+        updateScoreboardUI();
+
+        const msg = `¡Órdago ganado por ${PLAYERS[winnerPlayer].name} (${winnerTeam === 0 ? 'Nosotros' : 'Ellos'}) en ${lanceLabel}!`;
+        addLog(`🏆 ${msg}`, 'highlight');
+        state.lanceOutcomes = [{
+          lance,
+          label: `${lanceLabel} (ÓRDAGO)`,
+          winnerTeam,
+          pts: 40,
+          detail: `Gana ${PLAYERS[winnerPlayer].name}`
+        }];
+        showShowdownModal('¡Órdago Resuelto!', msg, true);
+      }
+
+      function resolveEndOfHandShowdown() {
+        const laReal = document.getElementById('opt-la-real').checked;
+        state.phase = 'SHOWDOWN';
+        state.revealAll = true;
+        renderTable();
+
+        // Compute winners & jugada bonuses for all recorded lances in order
+        for (const item of state.lanceOutcomes) {
+          if (item.alreadyAwarded) continue;
+
+          if (item.winnerTeam === null) {
+            const res = determineLanceWinner(item.lance);
+            item.winnerTeam = res.winnerTeam;
+            item.detail += ` — gana ${PLAYERS[res.winnerPlayer].name}`;
+
+            if (item.lance === 'PARES') {
+              const bonus = calcParesBonusForTeam(item.winnerTeam, laReal);
+              item.pts += bonus;
+              item.detail += ` (+${bonus} jugadas)`;
+            } else if (item.lance === 'JUEGO' && !state.isPunto) {
+              const bonus = calcJuegoBonusForTeam(item.winnerTeam);
+              item.pts += bonus;
+              item.detail += ` (+${bonus} jugadas)`;
+            } else if (item.lance === 'JUEGO' && state.isPunto && item.isPaso) {
+              // Punto in paso gives 1 pt for paso + 1 pt for Punto = 2 pts total
+              item.pts = 2;
+              item.detail = `Punto en paso (2 tantos) — gana ${PLAYERS[res.winnerPlayer].name}`;
+            }
+          }
+
+          state.scores[item.winnerTeam] += item.pts;
+          addLog(`${item.label}: +${item.pts} para ${item.winnerTeam === 0 ? 'Nosotros' : 'Ellos'} (${item.detail}).`);
+
+          // Check if someone hit 40 mid-count! (In Mus, counting stops the instant a pair reaches 40)
+          if (state.scores[item.winnerTeam] >= 40) {
+            updateScoreboardUI();
+            checkChicoWin();
+            return;
+          }
+        }
+
+        updateScoreboardUI();
+        showShowdownModal('Recuento de Tantos de la Mano', `Marcador: Nosotros ${state.scores[0]} — Ellos ${state.scores[1]} (meta: 40 tantos).`, false);
+      }
+
+      function showShowdownModal(title, subtitle, resetScoresOnNext) {
+        const laReal = document.getElementById('opt-la-real').checked;
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-subtitle').textContent = subtitle;
+
+        const tbody = document.getElementById('showdown-tbody');
+        tbody.innerHTML = state.lanceOutcomes.map(o => `
+          <tr>
+            <td><strong>${o.label}</strong></td>
+            <td>${o.detail}</td>
+            <td>${o.winnerTeam === -1 ? '—' : (o.winnerTeam === 0 ? 'Nosotros (ALCE)' : 'Ellos')}</td>
+            <td class="pts-won">${o.pts > 0 ? `+${o.pts}` : '0'}</td>
+          </tr>
+        `).join('');
+
+        const revealBox = document.getElementById('showdown-hands-reveal');
+        revealBox.innerHTML = PLAYERS.map((pl, idx) => {
+          const cards = state.hands[idx];
+          const str = cards.map(c => `${c.face} ${SUIT_NAMES[c.suit]}`).join(', ');
+          const j = evalJuego(cards);
+          const p = evalPares(cards, laReal);
+          return `<div><strong>${pl.name}${state.mano === idx ? ' (Mano)' : ''}:</strong> ${str}<br><span style="color:var(--ink-muted)">${p.label} · ${j.label}</span></div>`;
+        }).join('');
+
+        const btnNext = document.getElementById('btn-next-hand');
+        btnNext.textContent = resetScoresOnNext ? 'Empezar nuevo Chico' : 'Siguiente mano';
+        btnNext.onclick = () => {
+          if (resetScoresOnNext) {
+            state.scores = [0, 0];
+          }
+          // Rotate Mano counter-clockwise
+          state.mano = (state.mano + 1) % 4;
+          startNewHand();
+        };
+
+        document.getElementById('showdown-modal').classList.add('open');
+      }
+
+      /* =========================================================
+         11. EVENT WIRING
+         ========================================================= */
+      document.getElementById('btn-new-match').addEventListener('click', () => {
+        state.scores = [0, 0];
+        state.chicos = [0, 0];
+        state.mano = 0;
+        document.getElementById('log-list').innerHTML = '';
+        startNewHand();
+      });
+
+      document.getElementById('opt-la-real').addEventListener('change', () => {
+        renderTable();
+      });
+
+      document.getElementById('btn-rules').addEventListener('click', () => {
+        document.getElementById('rules-modal').classList.add('open');
+      });
+
+      document.getElementById('btn-close-rules').addEventListener('click', () => {
+        document.getElementById('rules-modal').classList.remove('open');
+      });
+
+      // Kick off first hand on load
+      startNewHand();
+    })();
+  </script>
+</body>
+</html>
