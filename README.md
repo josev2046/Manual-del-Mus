@@ -1,2 +1,2 @@
-# Manual-del-Mus
-Manual de Mus de la cuadrilla ALCE: Compendio de reglas, equivalencias de cartas, desarrollo de los cuatro lances y sistema de apuestas para las tardes de los miércoles.
+# Manual del Mus de la cuadrilla ALCE
+Compendio de reglas, equivalencias de cartas, desarrollo de los cuatro lances y sistema de apuestas para las tardes de los miércoles...
