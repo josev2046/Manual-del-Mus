@@ -98,6 +98,40 @@
       font-weight: 400;
     }
 
+    .header-cta {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-play {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: var(--felt);
+      color: #f4f1ea;
+      border: 1px solid var(--felt-border);
+      padding: 0.65rem 1.35rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      box-shadow: 0 2px 6px rgba(21, 43, 32, 0.15);
+    }
+
+    .btn-play:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-play svg {
+      width: 15px;
+      height: 15px;
+    }
+
     /* Minimalist Sticky Index */
     nav {
       background: rgba(244, 241, 234, 0.92);
@@ -108,6 +142,7 @@
       z-index: 100;
       display: flex;
       justify-content: center;
+      align-items: center;
       flex-wrap: wrap;
       gap: 1.75rem;
       padding: 0.9rem 1.5rem;
@@ -141,6 +176,26 @@
 
     nav a:hover::after {
       transform: scaleX(1);
+    }
+
+    nav a.nav-play {
+      color: var(--felt);
+      font-weight: 600;
+      padding: 0.28rem 0.7rem;
+      background: var(--surface);
+      border: 1px solid var(--rule-strong);
+      border-radius: 3px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    nav a.nav-play::after {
+      display: none;
+    }
+
+    nav a.nav-play:hover {
+      background: var(--felt);
+      color: #f4f1ea;
+      border-color: var(--felt);
     }
 
     /* Main Layout */
@@ -840,6 +895,23 @@
       color: var(--ink-muted);
     }
 
+    .footer-game-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(122, 38, 29, 0.35);
+      padding-bottom: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .footer-game-link:hover {
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+
     @media (max-width: 760px) {
       header h1 { font-size: 2.65rem; }
       .phases-grid { grid-template-columns: 1fr; }
@@ -965,6 +1037,14 @@
     <div class="kicker">Baraja Española · Reglamento</div>
     <h1>Manual de Mus de la cuadrilla ALCE</h1>
     <p>Compendio de reglas, equivalencias de cartas, desarrollo de los cuatro lances y sistema de apuestas.</p>
+    <div class="header-cta">
+      <a class="btn-play" href="https://josev2046.github.io/Manual-del-Mus/mus.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span>Jugar partida contra la máquina</span>
+      </a>
+    </div>
   </header>
 
   <nav>
@@ -973,6 +1053,7 @@
     <a href="#fases">III. Los Cuatro Lances</a>
     <a href="#apuestas">IV. Apuestas y Señas</a>
     <a href="#probador">V. Probador de Jugadas</a>
+    <a href="https://josev2046.github.io/Manual-del-Mus/mus.html" class="nav-play">Jugar al Mus &rarr;</a>
   </nav>
 
   <main>
@@ -1447,6 +1528,7 @@
     </svg>
     <div class="colophon-mark">&copy; La cuadrilla ALCE — ya sabéis quiénes sois.</div>
     <div class="colophon-sub">Prohibido mirar las cartas del compañero (sin disimulo)</div>
+    <a class="footer-game-link" href="https://josev2046.github.io/Manual-del-Mus/mus.html">Practicar en el tapete virtual de Mus &rarr;</a>
   </footer>
 
   <script>
