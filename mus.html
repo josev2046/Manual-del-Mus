@@ -971,7 +971,7 @@
     </div>
 
     <div class="header-controls">
-      <label class="rule-toggle" title="Activa la regla opcional de La Real en Pares (2 reyes + 2 ases ganan a todos los duples)">
+      <label class="rule-toggle" title="Activa la regla opcional de La Real en Pares (2 reyes + 2 ases ganan a todos los duples). Se aplica a partir de la siguiente mano.">
         <input type="checkbox" id="opt-la-real" />
         <span>Regla opcional: <strong>La Real</strong> en Pares</span>
       </label>
@@ -1129,7 +1129,7 @@
         <li><strong>Jerarquía (mayor a menor):</strong> Rey/3 &gt; Caballo &gt; Sota &gt; 7 &gt; 6 &gt; 5 &gt; 4 &gt; As/2.</li>
         <li><strong>Puntos:</strong> Figuras (12, 11, 10) y Treses = <strong>10 pts</strong>; del 4 al 7 = su número; As y Dos = <strong>1 pt</strong>.</li>
         <li><strong>La «Mano»:</strong> Jugador a la derecha del repartidor (orden antihorario: Sur &rarr; Este &rarr; Norte &rarr; Oeste). Gana todos los empates sin criterio numérico.</li>
-        <li><strong>Los 4 Lances:</strong> 1. <em>Grande</em> (cartas altas) &rarr; 2. <em>Chica</em> (cartas bajas) &rarr; 3. <em>Pares</em> (Par, Medias, Duples) &rarr; 4. <em>Juego</em> (31 &gt; 32 &gt; 40 &gt; 36 &gt; 35 &gt; 34 &gt; 33) o <em>Punto</em> (cerca de 30).</li>
+        <li><strong>Los 4 Lances:</strong> 1. <em>Grande</em> (cartas altas) &rarr; 2. <em>Chica</em> (cartas bajas) &rarr; 3. <em>Pares</em> (Par, Medias, Duples) &rarr; 4. <em>Juego</em> (31 &gt; 32 &gt; 40 &gt; 37 &gt; 36 &gt; 35 &gt; 34 &gt; 33) o <em>Punto</em> (cerca de 30).</li>
         <li><strong>Desempate de Duples:</strong> Primero pareja más alta y luego segunda pareja (<code>4 reyes &gt; reyes y caballos &gt; reyes y ases</code>, salvo si activas <em>La Real</em>).</li>
       </ul>
       <div class="modal-actions">
@@ -1171,7 +1171,8 @@
         { name: 'Rey', plural: 'reyes', pts: 10 }
       ];
 
-      const JUEGO_ORDER = [31, 32, 40, 36, 35, 34, 33];
+      // FIX #1: 37 was missing, so indexOf(37) === -1 and a 37 outscored a 31.
+      const JUEGO_ORDER = [31, 32, 40, 37, 36, 35, 34, 33];
 
       // Seats: 0 = South (Tú), 1 = East (Rival Este), 2 = North (Compañero), 3 = West (Rival Oeste)
       // Turn order is counter-clockwise: 0 -> 1 -> 2 -> 3 -> 0
@@ -1266,7 +1267,7 @@
       function evalJuego(cards) {
         const sum = cards.reduce((acc, c) => acc + c.pts, 0);
         if (sum >= 31) {
-          const idx = JUEGO_ORDER.indexOf(sum); // 0 is best (31), 6 is worst (33)
+          const idx = JUEGO_ORDER.indexOf(sum); // 0 is best (31), 7 is worst (33)
           return {
             hasJuego: true,
             sum,
@@ -1294,10 +1295,14 @@
          ========================================================= */
       const state = {
         deck: [],
+        discards: [],                // FIX #3: separate discard pile for reshuffling
         hands: [[], [], [], []],
+        // FIX #6: options are snapshotted at the start of each hand so toggling
+        // the checkbox mid-hand cannot change evaluations that were already announced.
+        options: { laReal: false },
         selectedDiscards: new Set(),
         mano: 0, // Player 0 starts as Mano
-        phase: 'IDLE', // MUS_CALL, DISCARD_SELECT, LANCE_BET, SHOWDOWN, MATCH_OVER
+        phase: 'IDLE', // MUS_CALL, DISCARD_SELECT, LANCE_BET, TRANSITION, SHOWDOWN, MATCH_OVER
         lanceIndex: 0, // 0: GRANDE, 1: CHICA, 2: PARES, 3: JUEGO
         isPunto: false,
         turnPlayer: 0,
@@ -1330,6 +1335,14 @@
       /* =========================================================
          4. DECK & DEALING HELPERS
          ========================================================= */
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
       function buildShuffledDeck() {
         const d = [];
         SUITS.forEach(suit => {
@@ -1337,19 +1350,16 @@
             d.push({ ...f, suit, uid: `${f.face}-${suit}` });
           });
         });
-        for (let i = d.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [d[i], d[j]] = [d[j], d[i]];
-        }
-        return d;
+        return shuffle(d);
       }
 
+      // FIX #3: when the deck runs short, shuffle the actual discard pile back in.
+      // (The old code rebuilt "every card not in a hand", which included cards
+      // still sitting in the deck and therefore duplicated them.)
       function drawCards(n) {
         if (state.deck.length < n) {
-          // Reshuffle discard pile into deck if exhausted
-          const inHands = new Set(state.hands.flat().map(c => c.uid));
-          const fresh = buildShuffledDeck().filter(c => !inHands.has(c.uid));
-          state.deck.push(...fresh);
+          state.deck.push(...shuffle(state.discards));
+          state.discards = [];
         }
         return state.deck.splice(0, n);
       }
@@ -1394,7 +1404,7 @@
       }
 
       function renderTable() {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
 
         // Render hands & Mano badges
         for (let p = 0; p < 4; p++) {
@@ -1403,7 +1413,11 @@
           const seatEl = document.getElementById(`seat-${p}`);
 
           manoEl.style.display = (state.mano === p) ? 'inline-block' : 'none';
-          seatEl.classList.toggle('active-turn', state.turnPlayer === p && state.phase !== 'SHOWDOWN' && state.phase !== 'MATCH_OVER');
+          seatEl.classList.toggle('active-turn',
+            state.turnPlayer === p &&
+            state.phase !== 'SHOWDOWN' &&
+            state.phase !== 'MATCH_OVER' &&
+            state.phase !== 'TRANSITION');
 
           const isHuman = (p === 0);
           const showCards = isHuman || state.revealAll;
@@ -1534,6 +1548,12 @@
           return;
         }
 
+        // FIX #2: no live buttons while a lance/mus transition is pending.
+        if (state.phase === 'TRANSITION') {
+          deckEl.innerHTML = '<span class="waiting-note">Un momento…</span>';
+          return;
+        }
+
         if (state.turnPlayer !== 0 || (state.phase !== 'MUS_CALL' && state.phase !== 'LANCE_BET')) {
           deckEl.innerHTML = `<span class="waiting-note">Turno de ${PLAYERS[state.turnPlayer].name}…</span>`;
           return;
@@ -1618,7 +1638,7 @@
       }
 
       function detectBestSena(cards) {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         const h = sortDescRanks(cards);
         const j = evalJuego(cards);
         const p = evalPares(cards, laReal);
@@ -1654,7 +1674,12 @@
          ========================================================= */
       function startNewHand() {
         clearTimeout(state.timer);
+
+        // FIX #6: snapshot the optional rule for the whole hand.
+        state.options.laReal = document.getElementById('opt-la-real').checked;
+
         state.deck = buildShuffledDeck();
+        state.discards = [];
         state.hands = [drawCards(4), drawCards(4), drawCards(4), drawCards(4)];
         // Sort human cards nicely
         state.hands[0].sort((a, b) => b.effRank - a.effRank);
@@ -1693,7 +1718,7 @@
       }
 
       function aiWantsMus(playerId) {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         const cards = state.hands[playerId];
         const j = evalJuego(cards);
         const p = evalPares(cards, laReal);
@@ -1714,6 +1739,11 @@
         if (!wantsMus) {
           showBubble(playerId, '¡Corto! No hay mus.');
           addLog(`${PLAYERS[playerId].name} corta el mus.`);
+          // FIX #2: lock the table during the pause so a second click can't re-enter.
+          clearTimeout(state.timer);
+          state.phase = 'TRANSITION';
+          renderTable();
+          renderActionDeck();
           state.timer = setTimeout(() => beginLances(), 950);
           return;
         }
@@ -1739,11 +1769,9 @@
       }
 
       function aiChooseDiscardIndices(cards) {
-        const laReal = document.getElementById('opt-la-real').checked;
-        const p = evalPares(cards, laReal);
-        const j = evalJuego(cards);
+        const p = evalPares(cards, state.options.laReal);
 
-        // Keep pairs/trips if present
+        // Keep pairs/trips if present; throw away singletons except Kings and Aces.
         if (p.has) {
           const counts = {};
           cards.forEach(c => counts[c.effRank] = (counts[c.effRank] || 0) + 1);
@@ -1753,21 +1781,27 @@
               toDiscard.push(idx);
             }
           });
-          return toDiscard.length > 0 ? toDiscard : [3];
+          // FIX #5: nothing worth throwing away -> stand pat ("servido").
+          // The old fallback [3] discarded an arbitrary (possibly paired) card.
+          return toDiscard;
         }
 
-        // Otherwise keep Kings (7) and Aces (0), discard middle cards (4,5,6,7,Sota)
+        // No pairs: keep Kings (7) and Aces (0), discard everything else.
+        // (With four cards drawn only from Kings/Aces a pair is guaranteed, so
+        // this branch always has at least two cards to throw away.)
         const toDiscard = [];
         cards.forEach((c, idx) => {
           if (c.effRank !== 7 && c.effRank !== 0) toDiscard.push(idx);
         });
-        return toDiscard.length > 0 ? toDiscard : [0, 1, 2, 3];
+        return toDiscard;
       }
 
       function executeAllDiscards() {
+        if (state.phase !== 'DISCARD_SELECT') return;
+
         // Human discards
         const humanDiscards = Array.from(state.selectedDiscards).sort((a, b) => b - a);
-        humanDiscards.forEach(idx => state.hands[0].splice(idx, 1));
+        humanDiscards.forEach(idx => state.discards.push(...state.hands[0].splice(idx, 1)));
         state.hands[0].push(...drawCards(humanDiscards.length));
         state.hands[0].sort((a, b) => b.effRank - a.effRank);
         addLog(`Te descartas de ${humanDiscards.length} ${humanDiscards.length === 1 ? 'carta' : 'cartas'}.`);
@@ -1775,9 +1809,9 @@
         // AI discards
         for (let p = 1; p < 4; p++) {
           const idxs = aiChooseDiscardIndices(state.hands[p]).sort((a, b) => b - a);
-          idxs.forEach(idx => state.hands[p].splice(idx, 1));
+          idxs.forEach(idx => state.discards.push(...state.hands[p].splice(idx, 1)));
           state.hands[p].push(...drawCards(idxs.length));
-          showBubble(p, `Cambio ${idxs.length}`);
+          showBubble(p, idxs.length ? `Cambio ${idxs.length}` : 'Servido');
         }
 
         // Loop back to another Mus round starting from Mano
@@ -1799,15 +1833,29 @@
         setupCurrentLance();
       }
 
+      // FIX #2: single entry point for "pause, then go to the next lance".
+      // Moving to TRANSITION makes every existing phase guard reject stray
+      // clicks, and clearing the timer guarantees only one advance is ever queued.
+      function advanceLanceAfter(ms) {
+        clearTimeout(state.timer);
+        state.phase = 'TRANSITION';
+        renderTable();
+        renderActionDeck();
+        state.timer = setTimeout(() => {
+          state.lanceIndex++;
+          setupCurrentLance();
+        }, ms);
+      }
+
       function setupCurrentLance() {
         if (state.lanceIndex >= 4) {
           resolveEndOfHandShowdown();
           return;
         }
 
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         const lance = LANCES[state.lanceIndex];
-        state.phase = 'LANCE_BET';
+        // Phase stays TRANSITION until the betting round is actually ready (see below).
         state.betAmount = 1; // 1 = en paso
         state.lastBetterTeam = -1;
         state.pendingBet = 0;
@@ -1829,8 +1877,7 @@
           if (!team0Has && !team1Has) {
             state.lanceOutcomes.push({ lance: 'PARES', label: '3. Los Pares', winnerTeam: -1, pts: 0, detail: 'Nadie tiene pares' });
             setCenterStatus('3. Los Pares', 'Nadie tiene pares. Pasamos al Juego…', 'Sin jugada');
-            renderTable();
-            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1350);
+            advanceLanceAfter(1350);
             return;
           }
           if (!team0Has || !team1Has) {
@@ -1845,8 +1892,7 @@
               detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (+${bonus} jugada)`
             });
             setCenterStatus('3. Los Pares', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (se anota al final).`, 'Sin rival en pares');
-            renderTable();
-            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1450);
+            advanceLanceAfter(1450);
             return;
           }
           state.eligiblePlayers = [0, 1, 2, 3].filter(p => hasPares[p]);
@@ -1877,15 +1923,15 @@
                 detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (+${bonus} jugada)`
               });
               setCenterStatus('4. El Juego', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (se anota al final).`, 'Sin rival en juego');
-              renderTable();
-              state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1450);
+              advanceLanceAfter(1450);
               return;
             }
             state.eligiblePlayers = [0, 1, 2, 3].filter(p => hasJuego[p]);
           }
         }
 
-        // Find first eligible player starting from Mano
+        // Betting round is ready: only now do the buttons/turn go live.
+        state.phase = 'LANCE_BET';
         state.turnPlayer = getNextEligiblePlayer(state.mano, true);
         const title = (lance === 'JUEGO' && state.isPunto) ? '4. El Punto' : LANCE_TITLES[lance];
         setCenterStatus(title, `Habla ${PLAYERS[state.turnPlayer].name}`, 'En juego: 1 tanto (en paso)');
@@ -1934,8 +1980,7 @@
               detail: 'En paso (1 tanto)'
             });
             setCenterStatus(lanceLabel, 'Todos pasan. Se resolverá al final de la mano.', 'En paso: 1 tanto');
-            renderTable();
-            state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 950);
+            advanceLanceAfter(950);
           } else {
             state.turnPlayer = getNextEligiblePlayer(playerId, false);
             setCenterStatus(lanceLabel, `Turno de ${PLAYERS[state.turnPlayer].name}`, 'En paso: 1 tanto');
@@ -2006,8 +2051,7 @@
             detail: `Envite querido (${state.pendingBet} tantos)`
           });
           setCenterStatus(lanceLabel, `Envite querido (${state.pendingBet} tantos). Se resuelve al final.`, `Queridos: ${state.pendingBet} tantos`);
-          renderTable();
-          state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1050);
+          advanceLanceAfter(1050);
           return;
         }
 
@@ -2029,8 +2073,7 @@
             detail: `No querido (+${wonPts} dejada inmediata)`
           });
           setCenterStatus(lanceLabel, `No querido (+${wonPts} para ${winTeam === 0 ? 'Nosotros' : 'Ellos'}).`, 'Dejada anotada');
-          renderTable();
-          state.timer = setTimeout(() => { state.lanceIndex++; setupCurrentLance(); }, 1050);
+          advanceLanceAfter(1050);
         }
       }
 
@@ -2038,7 +2081,7 @@
          9. AI BETTING HEURISTICS
          ========================================================= */
       function evaluateAIStrengthForLance(playerId, lance) {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         const cards = state.hands[playerId];
         if (lance === 'GRANDE') {
           // Max scoreGrande is 7*512 + 7*64 + 7*8 + 7 = 4095
@@ -2118,7 +2161,7 @@
          10. SCORING & SHOWDOWN RESOLUTION
          ========================================================= */
       function determineLanceWinner(lance) {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         let bestPlayer = 0;
         let bestScore = -1;
 
@@ -2212,7 +2255,7 @@
       }
 
       function resolveEndOfHandShowdown() {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         state.phase = 'SHOWDOWN';
         state.revealAll = true;
         renderTable();
@@ -2220,6 +2263,9 @@
         // Compute winners & jugada bonuses for all recorded lances in order
         for (const item of state.lanceOutcomes) {
           if (item.alreadyAwarded) continue;
+          // FIX #4: "nobody has pares" is recorded with winnerTeam -1. Skip it,
+          // otherwise scores[-1] gets created and the log reads "+0 para Ellos".
+          if (item.winnerTeam === -1) continue;
 
           if (item.winnerTeam === null) {
             const res = determineLanceWinner(item.lance);
@@ -2257,17 +2303,23 @@
       }
 
       function showShowdownModal(title, subtitle, resetScoresOnNext) {
-        const laReal = document.getElementById('opt-la-real').checked;
+        const laReal = state.options.laReal;
         document.getElementById('modal-title').textContent = title;
         document.getElementById('modal-subtitle').textContent = subtitle;
+
+        // Outcomes with winnerTeam === null were never tallied (the chico ended first).
+        const teamLabel = o => o.winnerTeam === -1 ? '—'
+          : o.winnerTeam === null ? 'Sin recontar'
+          : (o.winnerTeam === 0 ? 'Nosotros (ALCE)' : 'Ellos');
+        const ptsLabel = o => o.winnerTeam === null ? '—' : (o.pts > 0 ? `+${o.pts}` : '0');
 
         const tbody = document.getElementById('showdown-tbody');
         tbody.innerHTML = state.lanceOutcomes.map(o => `
           <tr>
             <td><strong>${o.label}</strong></td>
             <td>${o.detail}</td>
-            <td>${o.winnerTeam === -1 ? '—' : (o.winnerTeam === 0 ? 'Nosotros (ALCE)' : 'Ellos')}</td>
-            <td class="pts-won">${o.pts > 0 ? `+${o.pts}` : '0'}</td>
+            <td>${teamLabel(o)}</td>
+            <td class="pts-won">${ptsLabel(o)}</td>
           </tr>
         `).join('');
 
@@ -2305,8 +2357,13 @@
         startNewHand();
       });
 
-      document.getElementById('opt-la-real').addEventListener('change', () => {
-        renderTable();
+      // FIX #6: the toggle no longer re-evaluates the hand in progress; it takes
+      // effect when the next hand is dealt.
+      document.getElementById('opt-la-real').addEventListener('change', (e) => {
+        const handInProgress = state.phase !== 'IDLE' && state.phase !== 'SHOWDOWN' && state.phase !== 'MATCH_OVER';
+        if (handInProgress && e.target.checked !== state.options.laReal) {
+          addLog('«La Real» se aplicará a partir de la próxima mano.');
+        }
       });
 
       document.getElementById('btn-rules').addEventListener('click', () => {
