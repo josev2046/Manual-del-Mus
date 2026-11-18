@@ -989,7 +989,7 @@
         <div class="hand-row" id="hand-2"></div>
         <div class="seat-header">
           <span class="team-dot team-us"></span>
-          <span>Compañero (Norte)</span>
+          <span>Compañer@ (Norte)</span>
           <span class="mano-badge" id="mano-2" style="display:none;">Mano</span>
         </div>
       </div>
@@ -1093,7 +1093,7 @@
   </div>
 
   <footer>
-    &copy; La cuadrilla ALCE — ya sabéis quiénes sois. · Reglamento estándar de Madrid (40 cartas, 3=Rey, 2=As).
+    &copy; José Velázquez 2026 | Reglamento estándar de Madrid (40 cartas, 3=Rey, 2=As).
   </footer>
 
   <!-- Showdown / End-of-Hand Modal -->
@@ -1174,12 +1174,12 @@
       // FIX #1: 37 was missing, so indexOf(37) === -1 and a 37 outscored a 31.
       const JUEGO_ORDER = [31, 32, 40, 37, 36, 35, 34, 33];
 
-      // Seats: 0 = South (Tú), 1 = East (Rival Este), 2 = North (Compañero), 3 = West (Rival Oeste)
+      // Seats: 0 = South (Tú), 1 = East (Rival Este), 2 = North (Compañer@), 3 = West (Rival Oeste)
       // Turn order is counter-clockwise: 0 -> 1 -> 2 -> 3 -> 0
       const PLAYERS = [
         { id: 0, name: 'Tú', team: 0, isHuman: true },
         { id: 1, name: 'Rival Este', team: 1, isHuman: false },
-        { id: 2, name: 'Compañero', team: 0, isHuman: false },
+        { id: 2, name: 'Compañer@', team: 0, isHuman: false },
         { id: 3, name: 'Rival Oeste', team: 1, isHuman: false }
       ];
 
@@ -1659,11 +1659,11 @@
         btn.className = 'btn-sena';
         btn.disabled = state.senaSentThisHand;
         btn.textContent = state.senaSentThisHand ? 'Seña enviada' : `Pasar seña (${sena.gesture})`;
-        btn.title = `Comunica a tu compañero: ${sena.meaning}`;
+        btn.title = `Comunica a tu compañer@: ${sena.meaning}`;
         btn.onclick = () => {
           state.senaSentThisHand = true;
           showBubble(0, `Seña: ${sena.gesture} (${sena.meaning})`, true, 3000);
-          addLog(`Pasas seña al compañero: ${sena.gesture} [${sena.meaning}].`);
+          addLog(`Pasas seña al compañer@: ${sena.gesture} [${sena.meaning}].`);
           renderActionDeck();
         };
         container.appendChild(btn);
@@ -1711,7 +1711,7 @@
           setTimeout(() => {
             if (state.phase !== 'SHOWDOWN' && state.phase !== 'MATCH_OVER') {
               showBubble(2, `Seña: ${sena.gesture} (${sena.meaning})`, true, 3400);
-              addLog(`Tu compañero te hace una seña: ${sena.gesture} (${sena.meaning}).`);
+              addLog(`Tu compañer@ te hace una seña: ${sena.gesture} (${sena.meaning}).`);
             }
           }, 900);
         }
