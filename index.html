@@ -75,7 +75,7 @@
     header p {
       color: var(--ink-muted);
       font-size: 1.02rem;
-      max-width: 540px;
+      max-width: 560px;
       margin: 0 auto;
       font-weight: 400;
     }
@@ -464,12 +464,26 @@
       padding-left: 1.2rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.55rem;
       color: var(--ink-muted);
       font-size: 0.9rem;
     }
 
     .phase-box ol strong {
+      color: var(--ink);
+    }
+
+    .caveat-note {
+      background: var(--bg);
+      border-left: 2px solid var(--gold);
+      padding: 0.65rem 0.85rem;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      line-height: 1.5;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .caveat-note strong {
       color: var(--ink);
     }
 
@@ -593,7 +607,7 @@
     .evaluator-controls {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: 1rem;
       padding-bottom: 1.25rem;
@@ -654,12 +668,48 @@
       letter-spacing: 0.03em;
       cursor: pointer;
       transition: background 0.2s;
-      align-self: flex-end;
     }
 
     .btn-random:hover {
       background: var(--accent);
       border-color: var(--accent);
+    }
+
+    /* House Rules Toggle Bar */
+    .house-rules-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+    }
+
+    .rule-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--ink);
+      user-select: none;
+    }
+
+    .rule-toggle-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .rule-mode-hint {
+      font-size: 0.76rem;
+      color: var(--ink-muted);
+      font-style: italic;
     }
 
     .evaluator-stage {
@@ -1139,8 +1189,11 @@
           <ol>
             <li><strong>Par:</strong> 2 cartas iguales.</li>
             <li><strong>Medias (o trío):</strong> 3 cartas iguales.</li>
-            <li><strong>Duples:</strong> 2 parejas. (Los duples de reyes y ases son los <em>«duples gallegos»</em>, los más altos).</li>
+            <li><strong>Duples:</strong> 2 parejas (o 4 cartas iguales). El desempate sigue el orden de la Grande: primero se compara la <strong>pareja más alta</strong> y, si empatan, la <strong>segunda pareja</strong> (<strong>4 reyes &gt; reyes y caballos &gt; reyes y sotas…</strong>).</li>
           </ol>
+          <div class="caveat-note">
+            <strong>Salvedad sobre «La Real» (reyes y ases):</strong> En el reglamento estándar (como se juega en Madrid), los <em>duples gallegos</em> (2 reyes y 2 ases) desempatan por su segunda pareja (ases) y pierden contra reyes y caballos. Sin embargo, si se pacta jugar con la regla opcional de <strong>«La Real»</strong> aplicada también a los Pares (y no solo al Juego de 31), entonces 2 reyes y 2 ases pasan a ganar a cualquier otro duples.
+          </div>
           <div class="hand-showcase">
             <div class="hand-example">
               <div class="card-wrap">
@@ -1151,14 +1204,14 @@
                 <span class="equiv-pill">= Rey</span>
               </div>
               <div class="card-wrap">
-                <div class="card copas"><div class="card-inner"><div class="card-top"><span>1</span><svg><use href="#suit-copas"/></svg></div><div class="pips n1"><svg><use href="#suit-copas"/></svg></div><div class="card-bot"><span>1</span><svg><use href="#suit-copas"/></svg></div></div></div>
+                <div class="card copas"><div class="card-inner"><div class="card-top"><span>12</span><svg><use href="#suit-copas"/></svg></div><div class="court-art"><svg class="figure"><use href="#fig-rey"/></svg><span class="court-tag">Rey</span></div><div class="card-bot"><span>12</span><svg><use href="#suit-copas"/></svg></div></div></div>
               </div>
               <div class="card-wrap">
-                <div class="card bastos"><div class="card-inner"><div class="card-top"><span>2</span><svg><use href="#suit-bastos"/></svg></div><div class="pips n2"><svg><use href="#suit-bastos"/></svg><svg><use href="#suit-bastos"/></svg></div><div class="card-bot"><span>2</span><svg><use href="#suit-bastos"/></svg></div></div></div>
-                <span class="equiv-pill">= As</span>
+                <div class="card bastos"><div class="card-inner"><div class="card-top"><span>3</span><svg><use href="#suit-bastos"/></svg></div><div class="pips n3"><svg><use href="#suit-bastos"/></svg><svg><use href="#suit-bastos"/></svg><svg><use href="#suit-bastos"/></svg></div><div class="card-bot"><span>3</span><svg><use href="#suit-bastos"/></svg></div></div></div>
+                <span class="equiv-pill">= Rey</span>
               </div>
             </div>
-            <div class="hand-caption">Duples gallegos: pareja de reyes (12+3) y de ases (1+2).</div>
+            <div class="hand-caption">Duples máximos (regla estándar): cuatro reyes (dos 12 y dos 3).</div>
           </div>
         </div>
 
@@ -1181,6 +1234,9 @@
             </li>
             <li><strong>Al Punto:</strong> Si <strong>nadie</strong> alcanza 31, se juega al Punto, donde gana quien más se acerque a <strong>30</strong> (siendo el 30 el mejor).</li>
           </ol>
+          <div class="caveat-note">
+            <strong>Matiz de «La Real» en el Juego:</strong> Con esta variante pactada, una mano de <strong>31 real</strong> (tres sietes y una sota, o según variante pactada) gana a cualquier otra 31 aunque no sea mano. En Madrid no se aplica salvo acuerdo previo.
+          </div>
           <div class="hand-showcase">
             <div class="hand-example">
               <div class="card-wrap">
@@ -1247,6 +1303,14 @@
           <button type="button" class="btn-random" id="btn-random">Repartir mano aleatoria</button>
         </div>
 
+        <div class="house-rules-bar">
+          <label class="rule-toggle-label" for="toggle-real-pares">
+            <input type="checkbox" id="toggle-real-pares" />
+            <span>Activar regla opcional de <strong>«La Real» en Pares</strong> (2 reyes + 2 ases ganan a todos los duples)</span>
+          </label>
+          <span class="rule-mode-hint" id="rule-mode-hint">Modo estándar (Madrid): desempate estricto por jerarquía (4 reyes &gt; reyes y caballos…).</span>
+        </div>
+
         <div class="evaluator-stage">
           <div class="eval-felt">
             <div class="eval-cards-row" id="eval-cards-row"></div>
@@ -1296,7 +1360,7 @@
   </main>
 
   <footer>
-    <div class="colophon-mark">&copy; La cuadrilla ALCE — ya sabéis quiénes sois, compañer@s.</div>
+    <div class="colophon-mark">&copy; La cuadrilla ALCE — ya sabéis quiénes sois.</div>
     <div class="colophon-sub">Prohibido mirar las cartas del compañero (sin disimulo)</div>
   </footer>
 
@@ -1355,26 +1419,44 @@
         return (7 - h[3]) * 512 + (7 - h[2]) * 64 + (7 - h[1]) * 8 + (7 - h[0]);
       }
 
-      function analyzePares(h) {
+      function analyzePares(h, realInPares) {
         const counts = {};
         h.forEach(r => counts[r] = (counts[r] || 0) + 1);
         const groups = Object.entries(counts)
           .map(([r, cnt]) => ({ r: Number(r), cnt }))
           .sort((x, y) => (y.cnt - x.cnt) || (y.r - x.r));
 
+        // 4 equal cards = Duples of that rank (4 Reyes = 377)
         if (groups[0].cnt === 4) {
           const r = groups[0].r;
+          const isMaxStandard = (r === 7 && !realInPares);
           return {
             hasPares: true,
             score: 300 + r * 10 + r,
             title: `Duples de ${EFF_META[r].plural}`,
-            desc: `Cuatro ${EFF_META[r].plural} (dos parejas iguales).`
+            desc: isMaxStandard
+              ? 'Los duples más altos (4 reyes; vencen a cualquier otra jugada de pares).'
+              : (r === 7 && realInPares)
+                ? '4 reyes: segundos mejores duples (superados solo por «La Real» al estar activada).'
+                : `Cuatro ${EFF_META[r].plural} (equivalen a dos parejas de ${EFF_META[r].plural}).`
           };
         }
+
+        // 2 distinct pairs = Duples
         if (groups[0].cnt === 2 && groups[1].cnt === 2) {
           const r1 = groups[0].r;
           const r2 = groups[1].r;
           const isGallegos = (r1 === 7 && r2 === 0);
+
+          if (isGallegos && realInPares) {
+            return {
+              hasPares: true,
+              score: 399, // Above 4 Reyes (377) when La Real is active in Pares
+              title: 'La Real (Duples de Reyes y Ases)',
+              desc: 'Con la regla de «La Real» activada en Pares, esta combinación gana a todos los duples (incluso a 4 reyes).'
+            };
+          }
+
           return {
             hasPares: true,
             score: 300 + r1 * 10 + r2,
@@ -1382,10 +1464,11 @@
               ? 'Duples gallegos (Reyes y Ases)'
               : `Duples de ${EFF_META[r1].plural} y ${EFF_META[r2].plural}`,
             desc: isGallegos
-              ? 'La mejor combinación de duples posible en el Mus.'
-              : 'Dos parejas distintas en la misma mano.'
+              ? 'Empatan en la primera pareja (reyes) pero pierden el desempate de la segunda pareja (ases) frente a reyes y caballos, sotas, etc.'
+              : `Desempate: primero por pareja alta (${EFF_META[r1].plural}) y luego por segunda pareja (${EFF_META[r2].plural}).`
           };
         }
+
         if (groups[0].cnt === 3) {
           const r = groups[0].r;
           return {
@@ -1395,6 +1478,7 @@
             desc: `Trío de ${EFF_META[r].plural}. Vence a cualquier Par simple.`
           };
         }
+
         if (groups[0].cnt === 2) {
           const r = groups[0].r;
           return {
@@ -1404,6 +1488,7 @@
             desc: `Pareja simple de ${EFF_META[r].plural}.`
           };
         }
+
         return {
           hasPares: false,
           score: 0,
@@ -1422,7 +1507,7 @@
             score: 100 + (10 - idx),
             title: sum === 31 ? 'Juego de 31 (La Una)' : `Juego de ${sum}`,
             desc: sum === 31
-              ? 'El juego máximo; gana a cualquier otro juego.'
+              ? 'El juego máximo; gana a cualquier otro juego (salvo pacto de 31 real).'
               : `Posición ${idx + 1}.ª de 7 en la jerarquía de Juego.`
           };
         }
@@ -1439,10 +1524,13 @@
 
       const grandeScores = ALL_HANDS.map(scoreGrande).sort((a, b) => b - a);
       const chicaScores = ALL_HANDS.map(scoreChica).sort((a, b) => b - a);
-      const paresHands = ALL_HANDS.map(analyzePares).filter(p => p.hasPares).map(p => p.score).sort((a, b) => b - a);
       const juegoHands = ALL_HANDS.map(analyzeJuego).map(j => j.score).sort((a, b) => b - a);
 
       const selectorsContainer = document.getElementById('card-selectors');
+      const toggleRealPares = document.getElementById('toggle-real-pares');
+      const ruleModeHint = document.getElementById('rule-mode-hint');
+
+      // Default hand: Reyes y Ases (12, 3, 1, 2) so toggling "La Real" demonstrates the rank shift immediately
       const defaultFaces = [12, 3, 1, 2];
       const selects = [];
 
@@ -1472,6 +1560,13 @@
         selects.push(sel);
       }
 
+      toggleRealPares.addEventListener('change', () => {
+        ruleModeHint.textContent = toggleRealPares.checked
+          ? 'Regla opcional activa: 2 reyes + 2 ases («La Real») pasan al #1 de Pares.'
+          : 'Modo estándar (Madrid): desempate estricto por jerarquía (4 reyes > reyes y caballos…).';
+        evaluateCurrent();
+      });
+
       function renderCardHTML(face, suit) {
         const ct = CARD_TYPES.find(c => c.face === face);
         let centerHTML = '';
@@ -1498,6 +1593,13 @@
       }
 
       function evaluateCurrent() {
+        const realInPares = toggleRealPares.checked;
+        const paresHands = ALL_HANDS
+          .map(h => analyzePares(h, realInPares))
+          .filter(p => p.hasPares)
+          .map(p => p.score)
+          .sort((a, b) => b - a);
+
         const chosenFaces = selects.map(s => Number(s.value));
         const chosenCards = chosenFaces.map(f => CARD_TYPES.find(c => c.face === f));
 
@@ -1534,7 +1636,7 @@
           cRank <= 110 ? 'Chica aceptable con cartas bajas.' :
           'Cartas demasiado altas para competir a Chica.';
 
-        const pInfo = analyzePares(sortedRanks);
+        const pInfo = analyzePares(sortedRanks, realInPares);
         if (pInfo.hasPares) {
           const pRank = paresHands.indexOf(pInfo.score) + 1;
           document.getElementById('rank-pares').textContent = `#${pRank} de ${paresHands.length}`;
