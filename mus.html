@@ -1055,13 +1055,13 @@
         </div>
         <div class="score-grid">
           <div class="team-score-box us">
-            <div class="team-name">Nosotros (ALCE)</div>
+            <div class="team-name">Nosotr@s (ALCE)</div>
             <div class="tantos-num" id="score-us">0</div>
             <div class="piedras-breakdown" id="piedras-us">0 amarrakos · 0 piedras</div>
             <div class="chicos-pill" id="chicos-us">0 Chicos</div>
           </div>
           <div class="team-score-box them">
-            <div class="team-name">Ellos (Rivales)</div>
+            <div class="team-name">Ell@s (Rivales)</div>
             <div class="tantos-num" id="score-them">0</div>
             <div class="piedras-breakdown" id="piedras-them">0 amarrakos · 0 piedras</div>
             <div class="chicos-pill" id="chicos-them">0 Chicos</div>
@@ -1889,9 +1889,9 @@
               label: '3. Los Pares',
               winnerTeam: winTeam,
               pts: 1 + bonus,
-              detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (+${bonus} jugada)`
+              detail: `Solo ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'} tienen pares (+${bonus} jugada)`
             });
-            setCenterStatus('3. Los Pares', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen pares (se anota al final).`, 'Sin rival en pares');
+            setCenterStatus('3. Los Pares', `Solo ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'} tienen pares (se anota al final).`, 'Sin rival en pares');
             advanceLanceAfter(1450);
             return;
           }
@@ -1920,9 +1920,9 @@
                 label: '4. El Juego',
                 winnerTeam: winTeam,
                 pts: 1 + bonus,
-                detail: `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (+${bonus} jugada)`
+                detail: `Solo ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'} tienen juego (+${bonus} jugada)`
               });
-              setCenterStatus('4. El Juego', `Solo ${winTeam === 0 ? 'Nosotros' : 'Ellos'} tienen juego (se anota al final).`, 'Sin rival en juego');
+              setCenterStatus('4. El Juego', `Solo ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'} tienen juego (se anota al final).`, 'Sin rival en juego');
               advanceLanceAfter(1450);
               return;
             }
@@ -2059,7 +2059,7 @@
           const winTeam = state.lastBetterTeam;
           const wonPts = state.betAmount; // 1 tanto de dejada if initial bet was refused, or previous floor
           showBubble(playerId, 'No quiero.');
-          addLog(`${player.name} no quiere. ${winTeam === 0 ? 'Nosotros' : 'Ellos'} ganan ${wonPts} ${wonPts === 1 ? 'tanto' : 'tantos'} de dejada.`);
+          addLog(`${player.name} no quiere. ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'} ganan ${wonPts} ${wonPts === 1 ? 'tanto' : 'tantos'} de dejada.`);
           // Dejada points are awarded immediately in Mus!
           awardPointsImmediate(winTeam, wonPts);
           if (state.phase === 'MATCH_OVER') return;
@@ -2072,7 +2072,7 @@
             alreadyAwarded: true,
             detail: `No querido (+${wonPts} dejada inmediata)`
           });
-          setCenterStatus(lanceLabel, `No querido (+${wonPts} para ${winTeam === 0 ? 'Nosotros' : 'Ellos'}).`, 'Dejada anotada');
+          setCenterStatus(lanceLabel, `No querido (+${wonPts} para ${winTeam === 0 ? 'Nosotr@s' : 'Ell@s'}).`, 'Dejada anotada');
           advanceLanceAfter(1050);
         }
       }
@@ -2224,7 +2224,7 @@
             state.phase = 'MATCH_OVER';
             state.revealAll = true;
             renderTable();
-            const winnerName = t === 0 ? '¡Nosotros (Cuadrilla ALCE) ganamos el Chico!' : 'Ellos (los Rivales) ganan el Chico.';
+            const winnerName = t === 0 ? '¡Nosotr@s (Cuadrilla ALCE) ganamos el Chico!' : 'Ell@s (los Rivales) ganan el Chico.';
             addLog(`🏆 ${winnerName} (${state.scores[0]} a ${state.scores[1]})`, 'highlight');
             showShowdownModal(winnerName, 'Se han alcanzado los 40 tantos reglamentarios. Pulsa «Siguiente mano» para empezar un nuevo Chico.', true);
             return true;
@@ -2242,7 +2242,7 @@
         state.phase = 'MATCH_OVER';
         updateScoreboardUI();
 
-        const msg = `¡Órdago ganado por ${PLAYERS[winnerPlayer].name} (${winnerTeam === 0 ? 'Nosotros' : 'Ellos'}) en ${lanceLabel}!`;
+        const msg = `¡Órdago ganado por ${PLAYERS[winnerPlayer].name} (${winnerTeam === 0 ? 'Nosotr@s' : 'Ell@s'}) en ${lanceLabel}!`;
         addLog(`🏆 ${msg}`, 'highlight');
         state.lanceOutcomes = [{
           lance,
@@ -2264,7 +2264,7 @@
         for (const item of state.lanceOutcomes) {
           if (item.alreadyAwarded) continue;
           // FIX #4: "nobody has pares" is recorded with winnerTeam -1. Skip it,
-          // otherwise scores[-1] gets created and the log reads "+0 para Ellos".
+          // otherwise scores[-1] gets created and the log reads "+0 para Ell@s".
           if (item.winnerTeam === -1) continue;
 
           if (item.winnerTeam === null) {
@@ -2288,7 +2288,7 @@
           }
 
           state.scores[item.winnerTeam] += item.pts;
-          addLog(`${item.label}: +${item.pts} para ${item.winnerTeam === 0 ? 'Nosotros' : 'Ellos'} (${item.detail}).`);
+          addLog(`${item.label}: +${item.pts} para ${item.winnerTeam === 0 ? 'Nosotr@s' : 'Ell@s'} (${item.detail}).`);
 
           // Check if someone hit 40 mid-count! (In Mus, counting stops the instant a pair reaches 40)
           if (state.scores[item.winnerTeam] >= 40) {
@@ -2299,7 +2299,7 @@
         }
 
         updateScoreboardUI();
-        showShowdownModal('Recuento de Tantos de la Mano', `Marcador: Nosotros ${state.scores[0]} — Ellos ${state.scores[1]} (meta: 40 tantos).`, false);
+        showShowdownModal('Recuento de Tantos de la Mano', `Marcador: Nosotr@s ${state.scores[0]} — Ell@s ${state.scores[1]} (meta: 40 tantos).`, false);
       }
 
       function showShowdownModal(title, subtitle, resetScoresOnNext) {
@@ -2310,7 +2310,7 @@
         // Outcomes with winnerTeam === null were never tallied (the chico ended first).
         const teamLabel = o => o.winnerTeam === -1 ? '—'
           : o.winnerTeam === null ? 'Sin recontar'
-          : (o.winnerTeam === 0 ? 'Nosotros (ALCE)' : 'Ellos');
+          : (o.winnerTeam === 0 ? 'Nosotr@s (ALCE)' : 'Ell@s');
         const ptsLabel = o => o.winnerTeam === null ? '—' : (o.pts > 0 ? `+${o.pts}` : '0');
 
         const tbody = document.getElementById('showdown-tbody');
